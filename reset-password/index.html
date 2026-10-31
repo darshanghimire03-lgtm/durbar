@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#dde9fb">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Reset Password · Durbar</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0c1f4a;
+    --blue: #3d7be4;
+    --blue-dark: #2f66c9;
+    --muted: #8a96b0;
+    --field-bg: #f6f9ff;
+    --field-line: #d6e2f5;
+    --icon-box: #e3ecfb;
+    --error: #d93636;
+    --ok: #1f9d55;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { background: #f8fbff; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #111827;
+    max-width: 520px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .hero { position: relative; height: 290px; flex-shrink: 0; }
+  .hero svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero-text { position: absolute; left: 43px; right: 24px; top: 150px; }
+  .hero-text h1 { font-size: 2.3rem; font-weight: 700; color: var(--navy); letter-spacing: -0.02em; line-height: 1.1; }
+  .hero-text p { margin-top: 8px; font-size: 1rem; color: var(--muted); word-break: break-word; }
+  .view { display: none; margin: 40px 29px 0 29px; flex-direction: column; gap: 20px; }
+  .view.show { display: flex; }
+  .field {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 56px;
+    padding: 0 12px 0 9px;
+    background: var(--field-bg);
+    border: 2px solid var(--field-line);
+    border-radius: 999px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .field:focus-within { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(61, 123, 228, 0.15); }
+  .field.invalid { border-color: var(--error); }
+  .field-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--icon-box);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .field-icon svg { width: 20px; height: 20px; fill: var(--blue); }
+  .field input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 1.05rem;
+    color: var(--navy);
+  }
+  .field input::placeholder { color: var(--muted); }
+  .toggle {
+    border: none;
+    background: transparent;
+    color: var(--blue);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 8px 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .msg { display: none; font-size: 0.92rem; font-weight: 500; text-align: center; margin-top: -6px; line-height: 1.45; }
+  .msg.visible { display: block; }
+  .msg.error { color: var(--error); }
+  .msg.ok { color: var(--ok); }
+  .btn {
+    height: 54px;
+    border: none;
+    border-radius: 999px;
+    background: var(--blue);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(61, 123, 228, 0.3);
+    transition: background 0.2s ease, transform 0.1s ease, opacity 0.2s ease;
+  }
+  .btn:active { transform: scale(0.985); background: var(--blue-dark); }
+  .btn:disabled { opacity: 0.7; cursor: default; }
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #ffffff;
+    animation: spin 0.8s linear infinite;
+    display: none;
+  }
+  .btn.loading .spinner { display: block; }
+  .loader {
+    width: 38px;
+    height: 38px;
+    margin: 20px auto;
+    border-radius: 50%;
+    border: 4px solid var(--field-line);
+    border-top-color: var(--blue);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .back { text-align: center; font-size: 0.98rem; font-weight: 600; color: var(--blue); text-decoration: none; }
+  .note { text-align: center; font-size: 1rem; color: var(--muted); line-height: 1.5; }
+  .footer {
+    margin-top: auto;
+    padding: 40px 0 calc(28px + env(safe-area-inset-bottom)) 0;
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--muted);
+  }
+  .footer strong { color: var(--blue); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <svg viewBox="0 0 412 310" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 0H412V214C350 262 260 308 160 308C90 308 35 285 0 259Z" fill="#dde9fb"/>
+  </svg>
+  <div class="hero-text">
+    <h1 id="title">Reset Password</h1>
+    <p id="subtitle">Enter your email to get a reset link</p>
+  </div>
+</div>
+
+<div class="view" id="loadingView">
+  <div class="loader"></div>
+</div>
+
+<form class="view" id="requestView" novalidate>
+  <div class="field" id="emailField">
+    <span class="field-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+    </span>
+    <input type="email" id="email" placeholder="Email address" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false">
+  </div>
+  <div class="msg" id="requestMsg" role="alert"></div>
+  <button type="submit" class="btn" id="requestBtn">
+    <span class="spinner"></span>
+    <span id="requestLabel">Send Reset Link</span>
+  </button>
+  <a class="back" href="/auth.html">Back to Login</a>
+</form>
+
+<form class="view" id="resetView" novalidate>
+  <div class="field" id="passField">
+    <span class="field-icon">
+      <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+    </span>
+    <input type="password" id="newPass" placeholder="New password" autocomplete="new-password">
+    <button type="button" class="toggle" id="toggleBtn">Show</button>
+  </div>
+  <div class="field" id="confirmField">
+    <span class="field-icon">
+      <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+    </span>
+    <input type="password" id="confirmPass" placeholder="Confirm new password" autocomplete="new-password">
+  </div>
+  <div class="msg" id="resetMsg" role="alert"></div>
+  <button type="submit" class="btn" id="resetBtn">
+    <span class="spinner"></span>
+    <span id="resetLabel">Update Password</span>
+  </button>
+</form>
+
+<div class="view" id="doneView">
+  <p class="note">Your password has been updated. You can now log in with your new password.</p>
+  <a class="btn" href="/auth.html">Go to Login</a>
+</div>
+
+<div class="view" id="invalidView">
+  <p class="note" id="invalidNote">This reset link is invalid or has expired. Please request a new one.</p>
+  <a class="btn" href="/reset-password/">Request New Link</a>
+  <a class="back" href="/auth.html">Back to Login</a>
+</div>
+
+<div class="footer">Powered by <strong>Doroi</strong></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script>
+  (function () {
+    var params = new URLSearchParams(location.search);
+    if (!params.get("oobCode") && location.hash.indexOf("oobCode") !== -1) {
+      params = new URLSearchParams(location.hash.replace(/^#\/?\??/, ""));
+    }
+    var mode = params.get("mode");
+    var code = params.get("oobCode");
+
+    var views = {
+      loading: document.getElementById("loadingView"),
+      request: document.getElementById("requestView"),
+      reset: document.getElementById("resetView"),
+      done: document.getElementById("doneView"),
+      invalid: document.getElementById("invalidView")
+    };
+    var titleEl = document.getElementById("title");
+    var subtitleEl = document.getElementById("subtitle");
+    var invalidNote = document.getElementById("invalidNote");
+
+    function show(name, title, subtitle) {
+      Object.keys(views).forEach(function (key) {
+        views[key].classList.toggle("show", key === name);
+      });
+      titleEl.textContent = title;
+      subtitleEl.textContent = subtitle;
+    }
+
+    function setMsg(el, text, type) {
+      el.textContent = text;
+      el.className = "msg " + type + (text ? " visible" : "");
+    }
+
+    function setLoading(btn, label, isLoading, idle, busy) {
+      btn.disabled = isLoading;
+      btn.classList.toggle("loading", isLoading);
+      label.textContent = isLoading ? busy : idle;
+    }
+
+    var emailInput = document.getElementById("email");
+    var emailField = document.getElementById("emailField");
+    var requestMsg = document.getElementById("requestMsg");
+    var requestBtn = document.getElementById("requestBtn");
+    var requestLabel = document.getElementById("requestLabel");
+
+    emailInput.addEventListener("input", function () {
+      emailField.classList.remove("invalid");
+      setMsg(requestMsg, "", "error");
+    });
+
+    views.request.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email = emailInput.value.trim();
+      setMsg(requestMsg, "", "error");
+
+      if (!email) {
+        emailField.classList.add("invalid");
+        setMsg(requestMsg, "Please enter your email address.", "error");
+        emailInput.focus();
+        return;
+      }
+
+      setLoading(requestBtn, requestLabel, true, "Send Reset Link", "Sending...");
+
+      auth.sendPasswordResetEmail(email).then(function () {
+        setLoading(requestBtn, requestLabel, false, "Send Reset Link", "Sending...");
+        setMsg(requestMsg, "If an account exists for this email, a reset link has been sent. Open the link from the email to set your new password.", "ok");
+      }).catch(function (err) {
+        setLoading(requestBtn, requestLabel, false, "Send Reset Link", "Sending...");
+        var c = err && err.code;
+        if (c === "auth/user-not-found") {
+          setMsg(requestMsg, "If an account exists for this email, a reset link has been sent. Open the link from the email to set your new password.", "ok");
+        } else if (c === "auth/invalid-email") {
+          emailField.classList.add("invalid");
+          setMsg(requestMsg, "Please enter a valid email address.", "error");
+        } else if (c === "auth/too-many-requests") {
+          setMsg(requestMsg, "Too many attempts. Please try again later.", "error");
+        } else if (c === "auth/network-request-failed") {
+          setMsg(requestMsg, "Network error. Check your connection and try again.", "error");
+        } else {
+          setMsg(requestMsg, "Could not send the reset link. Please try again.", "error");
+        }
+      });
+    });
+
+    var newPass = document.getElementById("newPass");
+    var confirmPass = document.getElementById("confirmPass");
+    var passField = document.getElementById("passField");
+    var confirmField = document.getElementById("confirmField");
+    var resetMsg = document.getElementById("resetMsg");
+    var resetBtn = document.getElementById("resetBtn");
+    var resetLabel = document.getElementById("resetLabel");
+    var toggleBtn = document.getElementById("toggleBtn");
+
+    function clearReset() {
+      passField.classList.remove("invalid");
+      confirmField.classList.remove("invalid");
+      setMsg(resetMsg, "", "error");
+    }
+
+    newPass.addEventListener("input", clearReset);
+    confirmPass.addEventListener("input", clearReset);
+
+    toggleBtn.addEventListener("click", function () {
+      var showing = newPass.type === "text";
+      newPass.type = showing ? "password" : "text";
+      confirmPass.type = showing ? "password" : "text";
+      toggleBtn.textContent = showing ? "Show" : "Hide";
+    });
+
+    views.reset.addEventListener("submit", function (e) {
+      e.preventDefault();
+      clearReset();
+
+      var p1 = newPass.value;
+      var p2 = confirmPass.value;
+
+      if (p1.length < 6) {
+        passField.classList.add("invalid");
+        setMsg(resetMsg, "Password must be at least 6 characters.", "error");
+        newPass.focus();
+        return;
+      }
+
+      if (p1 !== p2) {
+        confirmField.classList.add("invalid");
+        setMsg(resetMsg, "Passwords do not match.", "error");
+        confirmPass.focus();
+        return;
+      }
+
+      setLoading(resetBtn, resetLabel, true, "Update Password", "Updating...");
+
+      auth.confirmPasswordReset(code, p1).then(function () {
+        history.replaceState(null, "", "/reset-password/");
+        show("done", "Password Updated", "You're all set");
+      }).catch(function (err) {
+        setLoading(resetBtn, resetLabel, false, "Update Password", "Updating...");
+        var c = err && err.code;
+        if (c === "auth/weak-password") {
+          passField.classList.add("invalid");
+          setMsg(resetMsg, "Password is too weak. Choose a stronger one.", "error");
+        } else if (c === "auth/expired-action-code" || c === "auth/invalid-action-code") {
+          show("invalid", "Link Expired", "This reset link can no longer be used");
+        } else if (c === "auth/network-request-failed") {
+          setMsg(resetMsg, "Network error. Check your connection and try again.", "error");
+        } else {
+          setMsg(resetMsg, "Could not update password. Please try again.", "error");
+        }
+      });
+    });
+
+    if (code && (!mode || mode === "resetPassword")) {
+      show("loading", "Checking Link", "Please wait...");
+      auth.verifyPasswordResetCode(code).then(function (email) {
+        show("reset", "New Password", email);
+        newPass.focus();
+      }).catch(function (err) {
+        var c = err && err.code;
+        invalidNote.textContent = c === "auth/network-request-failed"
+          ? "Network error. Check your connection and reload this page."
+          : "This reset link is invalid or has expired. Please request a new one.";
+        show("invalid", "Link Expired", "This reset link can no longer be used");
+      });
+    } else if (mode && mode !== "resetPassword") {
+      invalidNote.textContent = "This type of link is not supported on this page.";
+      show("invalid", "Unsupported Link", "Please request a new reset link");
+    } else {
+      show("request", "Reset Password", "Enter your email to get a reset link");
+    }
+  })();
+</script>
+
+</body>
+</html>
