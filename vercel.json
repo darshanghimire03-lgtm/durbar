@@ -1,7 +1,10 @@
-
 {
   "cleanUrls": false,
   "rewrites": [
+    {
+      "source": "/picture/:file",
+      "destination": "https://durbar-image-api.onrender.com/picture/:file"
+    },
     {
       "source": "/post/:id",
       "destination": "/api/share?type=post&id=:id"
@@ -25,10 +28,6 @@
     {
       "source": "/durbar/user/:id",
       "destination": "/api/share?type=user&id=:id"
-    },
-    {
-      "source": "/picture/:id/:filename",
-      "destination": "https://durbar-image-api.onrender.com/picture/:id/:filename"
     }
   ],
   "headers": [
