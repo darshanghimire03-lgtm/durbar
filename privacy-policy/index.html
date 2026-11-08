@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy - Durbar</title>
+<style>
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #1c2030;
+  --muted: #5d6479;
+  --accent: #3b5bdb;
+  --accent-soft: #e8edff;
+  --border: #e3e6f0;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1218;
+    --card: #181c26;
+    --text: #e8eaf2;
+    --muted: #9aa2b8;
+    --accent: #8ea2ff;
+    --accent-soft: #232a45;
+    --border: #272d3d;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.7;
+  font-size: 16px;
+}
+header {
+  background: linear-gradient(135deg, #3b5bdb, #5f3dc4);
+  color: #fff;
+  padding: 48px 20px 40px;
+  text-align: center;
+}
+header h1 { margin: 0 0 8px; font-size: 2rem; }
+header p { margin: 0; opacity: 0.9; }
+main { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 18px;
+}
+h2 { margin: 0 0 12px; font-size: 1.25rem; color: var(--accent); }
+h3 { margin: 18px 0 6px; font-size: 1.02rem; }
+p { margin: 0 0 12px; }
+ul { margin: 0 0 12px; padding-left: 22px; }
+li { margin-bottom: 6px; }
+a { color: var(--accent); }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+.toc a {
+  background: var(--accent-soft);
+  color: var(--accent);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+}
+table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+th, td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+.note {
+  background: var(--accent-soft);
+  border-left: 4px solid var(--accent);
+  padding: 12px 14px;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+footer { text-align: center; color: var(--muted); font-size: 0.88rem; padding: 0 16px 40px; }
+@media (max-width: 560px) {
+  header h1 { font-size: 1.6rem; }
+  .card { padding: 18px; }
+  table, thead, tbody, tr, th, td { display: block; }
+  thead { display: none; }
+  tr { border-bottom: 1px solid var(--border); padding: 8px 0; }
+  td { border: none; padding: 4px 0; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Privacy Policy</h1>
+  <p>Durbar &middot; Effective November 8, 2026</p>
+</header>
+<main>
+
+<div class="card">
+  <div class="toc">
+    <a href="#intro">Introduction</a>
+    <a href="#collect">Information we collect</a>
+    <a href="#use">How we use it</a>
+    <a href="#visibility">Who can see it</a>
+    <a href="#services">Third-party services</a>
+    <a href="#permissions">Permissions</a>
+    <a href="#background">Background service</a>
+    <a href="#security">Security</a>
+    <a href="#retention">Retention &amp; deletion</a>
+    <a href="#rights">Your rights</a>
+    <a href="#children">Age</a>
+    <a href="#changes">Changes</a>
+    <a href="#contact">Contact</a>
+  </div>
+</div>
+
+<div class="card" id="intro">
+  <h2>1. Introduction</h2>
+  <p>Durbar ("the App", "we", "us") is a college and school companion app for students and professors. It provides posts, short videos, notes, mock tests, a calendar, student directories and profile features. This Privacy Policy explains what information the App collects, why, how it is shared, and the choices you have.</p>
+  <p>By creating an account or using the App you agree to this Policy. If you do not agree, please do not use the App.</p>
+</div>
+
+<div class="card" id="collect">
+  <h2>2. Information we collect</h2>
+
+  <h3>2.1 Information you give us</h3>
+  <ul>
+    <li><strong>Account details:</strong> email address, password (handled by Firebase Authentication and never stored by us in plain text), or your Google account email if you use "Continue with Google".</li>
+    <li><strong>Profile details:</strong> full name, role (student, professor, captain or moderator), gender, phone number, date of birth, class level, section, assigned subject (for professors) and profile photo.</li>
+    <li><strong>Content you create:</strong> posts, photos, comments (including comment images), likes, short videos, notes, PDF and document attachments, links (including YouTube links), and mock test questions and sets.</li>
+    <li><strong>Invite and access tokens:</strong> student or professor tokens you enter to verify your role.</li>
+  </ul>
+
+  <h3>2.2 Information collected automatically</h3>
+  <ul>
+    <li><strong>Usage and diagnostics data</strong> through Firebase Analytics, such as app opens, screens viewed, device model, OS version and app version.</li>
+    <li><strong>Activity counters</strong> such as likes and short video view counts.</li>
+    <li><strong>Timestamps</strong> for account creation, posts, comments and uploads.</li>
+  </ul>
+
+  <h3>2.3 Information stored only on your device</h3>
+  <ul>
+    <li>Login session information and credentials protected with Android encrypted storage.</li>
+    <li>Mock test progress and results kept locally.</li>
+    <li>App preferences and notification state.</li>
+  </ul>
+  <div class="note">Biometric or screen-lock confirmation (used for sensitive actions such as deleting your account) is performed entirely by Android. Durbar never receives, sees or stores your fingerprint, face data or PIN.</div>
+
+  <h3>2.4 Information we do not collect</h3>
+  <p>We do not collect your precise location, contacts, call logs, SMS messages, microphone recordings or advertising identifiers, and we do not show third-party ads.</p>
+</div>
+
+<div class="card" id="use">
+  <h2>3. How we use your information</h2>
+  <ul>
+    <li>To create and secure your account and verify your role.</li>
+    <li>To display your profile, posts, comments, shorts, notes and other content to other users as described in section 4.</li>
+    <li>To show posts and content relevant to your class and section.</li>
+    <li>To send in-app notifications about new posts, notes, messages and calendar events.</li>
+    <li>To show the Nepali BS calendar, holidays and events.</li>
+    <li>To deliver app updates and announcements.</li>
+    <li>To maintain, debug and improve the App and keep it safe from abuse.</li>
+    <li>To respond to your support requests and enforce our Terms of Service.</li>
+  </ul>
+  <p>We do not sell your personal information.</p>
+</div>
+
+<div class="card" id="visibility">
+  <h2>4. Who can see your information</h2>
+  <ul>
+    <li><strong>Public to other Durbar users:</strong> your name, profile photo, role and badge, posts, comments, likes and shorts. Posts set to "Everyone" are visible to all users; posts set to "Section" are intended for members of your section.</li>
+    <li><strong>Visible to other signed-in users in the student directory or profile pages:</strong> details such as class, section and, where the feature is used, your phone number so that others can contact you.</li>
+    <li><strong>Shared links:</strong> if you share a post, short, photo, PDF or profile link, anyone with the link may be able to open that content.</li>
+    <li><strong>Administrators and moderators:</strong> app administrators can manage content, roles and updates and may view content stored in the App's database to keep the community safe.</li>
+  </ul>
+  <p>Please do not post information you want to keep private.</p>
+</div>
+
+<div class="card" id="services">
+  <h2>5. Third-party services</h2>
+  <p>The App relies on the following services to operate. Each processes data under its own privacy policy.</p>
+  <table>
+    <thead><tr><th>Service</th><th>Purpose</th><th>Data involved</th></tr></thead>
+    <tbody>
+      <tr><td>Firebase Authentication (Google)</td><td>Sign-up, login, password handling</td><td>Email, password, UID</td></tr>
+      <tr><td>Google Sign-In</td><td>Optional login with Google</td><td>Google account email, name, photo</td></tr>
+      <tr><td>Firebase Realtime Database (Google)</td><td>Stores profiles, posts, comments, notes, shorts, mock sets, chats and calendar data</td><td>Profile and content data</td></tr>
+      <tr><td>Firebase Storage (Google)</td><td>File storage</td><td>Uploaded files</td></tr>
+      <tr><td>Firebase Analytics (Google)</td><td>Usage statistics and diagnostics</td><td>Device and usage data</td></tr>
+      <tr><td>Cloudinary</td><td>Hosting for short videos, documents and PDFs</td><td>Uploaded videos and files</td></tr>
+      <tr><td>ImgBB</td><td>Hosting for images such as profile photos, post and comment images</td><td>Uploaded images</td></tr>
+      <tr><td>GitHub</td><td>Hosting of public Nepali calendar data</td><td>Standard request data (IP address)</td></tr>
+      <tr><td>YouTube</td><td>Link and thumbnail previews</td><td>Standard request data when previews load</td></tr>
+      <tr><td>WhatsApp</td><td>Opens a chat or shares a link when you tap the option</td><td>The phone number or link you choose to open or share</td></tr>
+      <tr><td>Vercel</td><td>Hosts the Durbar website used for shareable links</td><td>Standard request data</td></tr>
+    </tbody>
+  </table>
+  <p>Files uploaded to Cloudinary and ImgBB are served from public URLs. Anyone who has the exact URL may be able to open the file.</p>
+  <p>Links to Firebase's privacy information: <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a>. Google's policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
+</div>
+
+<div class="card" id="permissions">
+  <h2>6. Android permissions we use</h2>
+  <table>
+    <thead><tr><th>Permission</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Internet</td><td>Connect to our servers and third-party services.</td></tr>
+      <tr><td>Notifications</td><td>Alert you about new posts, notes, messages and events.</td></tr>
+      <tr><td>Foreground service (data sync)</td><td>Keep a lightweight sync running to detect new content and download updates.</td></tr>
+      <tr><td>Receive boot completed</td><td>Restart the notification service after your phone restarts.</td></tr>
+      <tr><td>Exact alarms</td><td>Keep the background service alive and deliver timely reminders.</td></tr>
+      <tr><td>Ignore battery optimizations</td><td>Request that Android does not stop the notification service. Optional; you can decline.</td></tr>
+      <tr><td>Install packages</td><td>Install new versions of the App that you choose to download through the in-app updater.</td></tr>
+      <tr><td>Write external storage (Android 9 and lower only)</td><td>Save downloaded files such as photos and PDFs.</td></tr>
+    </tbody>
+  </table>
+  <p>Photos, videos and documents are selected through Android's file picker, so the App only accesses the specific files you choose.</p>
+</div>
+
+<div class="card" id="background">
+  <h2>7. Background notifications</h2>
+  <p>Durbar does not use Firebase Cloud Messaging. Instead, a foreground service keeps a connection to our Firebase database to detect new posts, notes and messages and show you a notification. This service shows a persistent notification while it runs. It may use a small amount of battery and mobile data. You can disable notifications in Android settings at any time, though you may then miss new activity.</p>
+</div>
+
+<div class="card" id="security">
+  <h2>8. Security</h2>
+  <p>We use Firebase Authentication, HTTPS-only network traffic, Android encrypted storage for locally saved credentials, and database rules to protect your data. We do not store your password in plain text on your device. No system is perfectly secure, so we cannot guarantee absolute security. Choose a strong, unique password and keep your device locked.</p>
+</div>
+
+<div class="card" id="retention">
+  <h2>9. Data retention and account deletion</h2>
+  <p>We keep your information while your account is active. You can delete your account from <strong>Account Center &rarr; Delete Account</strong>. You will be asked to confirm with your password and with your device's screen lock or biometrics.</p>
+  <p>Deleting your account removes your profile record from our database and deletes your login from Firebase Authentication. Please note:</p>
+  <ul>
+    <li>Content you posted (posts, comments, shorts, notes) or files stored with Cloudinary and ImgBB may not be removed automatically. To request removal of specific content, contact us using the details below.</li>
+    <li>Backups and logs held by third-party providers may persist for a limited time under their own policies.</li>
+    <li>We may keep information where required for security, legal compliance or dispute resolution.</li>
+  </ul>
+</div>
+
+<div class="card" id="rights">
+  <h2>10. Your rights and choices</h2>
+  <ul>
+    <li><strong>Access and correction:</strong> view and edit your profile details in the App.</li>
+    <li><strong>Deletion:</strong> delete your account in the App or by contacting us.</li>
+    <li><strong>Content removal:</strong> ask us to remove content you uploaded.</li>
+    <li><strong>Notifications:</strong> manage through Android settings.</li>
+    <li><strong>Permissions:</strong> revoke permissions at any time in Android settings.</li>
+    <li><strong>Backups:</strong> the App allows Android backup of app data. You can turn off device backups in your Android settings.</li>
+  </ul>
+  <p>To exercise any right, email us at the address in section 13.</p>
+</div>
+
+<div class="card" id="children">
+  <h2>11. Age and minors</h2>
+  <p>Durbar is intended for students and teachers at the higher-secondary level and above. You must be at least 13 years old to use it. Users under 18 should use the App with the awareness of a parent or guardian. If you believe a child under 13 has created an account, contact us and we will remove it.</p>
+</div>
+
+<div class="card" id="changes">
+  <h2>12. Changes to this Policy</h2>
+  <p>We may update this Policy from time to time. The "Effective" date at the top shows when it was last changed. Continued use of the App after an update means you accept the revised Policy. For significant changes we will try to notify you in the App.</p>
+</div>
+
+<div class="card" id="contact">
+  <h2>13. Contact us</h2>
+  <p>Questions, requests or concerns about privacy:</p>
+  <p><strong>Durbar Team</strong><br>
+  Email: <a href="mailto:darshanghimire03@gmail.com">darshanghimire03@gmail.com</a><br>
+  Website: <a href="https://durbar-plus2.vercel.app" target="_blank" rel="noopener">durbar-plus2.vercel.app</a><br>
+  Location: Nepal</p>
+</div>
+
+</main>
+<footer>
+  &copy; 2026 Durbar. All rights reserved. &middot; <a href="terms-of-service.html">Terms of Service</a>
+</footer>
+</body>
+</html>
