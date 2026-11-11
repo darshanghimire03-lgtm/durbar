@@ -3,15 +3,15 @@
   "rewrites": [
   { 
       "source": "/img/:path*", 
-      "destination": "https://YOUR-SERVICE.onrender.com/img/:path*" 
+      "destination": "https://durbar-api-1.onrender.com/img/:path*" 
    
   },
     { "source": "/vid/:path*", 
-      "destination": "https://YOUR-SERVICE.onrender.com/vid/:path*" 
+      "destination": "https://durbar-api-1.onrender.com/vid/:path*" 
  
    },
     { "source": "/file/:path*", 
-      "destination": "https://YOUR-SERVICE.onrender.com/file/:path*" 
+      "destination": "https://durbar-api-1.onrender.com/file/:path*" 
   
     },
     {
