@@ -1,9 +1,9 @@
 {
   "cleanUrls": false,
   "rewrites": [
-{ "source": "/img/:path*", "destination": "https://durbar-api-1.onrender.com/img/:path*" },
-    { "source": "/vid/:path*", "destination": "https://durbar-api-1.onrender.com/vid/:path*" },
-    { "source": "/file/:path*", "destination": "https://durbar-api-1.onrender.com/file/:path*" },
+{ "source": "/img/:path*", "destination": "https://durbar-api.vercel.app/img/:path*" },
+    { "source": "/vid/:path*", "destination": "https://durbar-api.vercel.app/vid/:path*" },
+    { "source": "/file/:path*", "destination": "https://durbar-api.vercel.app/file/:path*" },
     {
       "source": "/post/:id",
       "destination": "/api/share?type=post&id=:id"
