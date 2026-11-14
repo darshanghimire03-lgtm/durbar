@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Continue with Google</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f4f6fb;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;width:100%;max-width:380px;border-radius:16px;padding:32px 24px;box-shadow:0 8px 30px rgba(0,0,0,.08);text-align:center}
+h1{font-size:22px;margin-bottom:8px;color:#1f2937}
+p.sub{font-size:14px;color:#6b7280;margin-bottom:24px}
+.btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px 16px;border:1px solid #d1d5db;border-radius:10px;background:#fff;font-size:15px;font-weight:500;color:#374151;cursor:pointer;transition:background .2s}
+.btn:hover{background:#f9fafb}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn svg{width:20px;height:20px}
+.btn.out{border-color:#fecaca;color:#b91c1c;margin-top:20px}
+.avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;margin:0 auto 14px;display:block;border:3px solid #e5e7eb}
+.name{font-size:18px;font-weight:600;color:#111827}
+.email{font-size:14px;color:#6b7280;margin-top:4px;word-break:break-all}
+.meta{font-size:12px;color:#9ca3af;margin-top:12px}
+.msg{margin-top:16px;font-size:13px;min-height:18px}
+.err{color:#b91c1c}
+.ok{color:#047857}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+<div id="loginView">
+<h1>Welcome</h1>
+<p class="sub">Sign in to continue</p>
+<button id="googleBtn" class="btn">
+<svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+<span id="googleBtnText">Continue with Google</span>
+</button>
+<div id="loginMsg" class="msg"></div>
+</div>
+
+<div id="profileView" class="hidden">
+<img id="avatar" class="avatar" src="" alt="Profile" referrerpolicy="no-referrer">
+<div id="fullName" class="name"></div>
+<div id="userEmail" class="email"></div>
+<div id="createdAt" class="meta"></div>
+<div id="dbMsg" class="msg"></div>
+<button id="logoutBtn" class="btn out">Sign out</button>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, get, set, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDejlLtvFPTFOJoXMFGjpuhImn6oYFCAxM",
+  authDomain: "darshang-8f99d.firebaseapp.com",
+  databaseURL: "https://darshang-8f99d-default-rtdb.firebaseio.com",
+  projectId: "darshang-8f99d",
+  storageBucket: "darshang-8f99d.firebasestorage.app",
+  messagingSenderId: "199221437404",
+  appId: "1:199221437404:web:e9c42331f2879378f6e519"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
+
+const loginView = document.getElementById("loginView");
+const profileView = document.getElementById("profileView");
+const googleBtn = document.getElementById("googleBtn");
+const googleBtnText = document.getElementById("googleBtnText");
+const loginMsg = document.getElementById("loginMsg");
+const dbMsg = document.getElementById("dbMsg");
+const avatar = document.getElementById("avatar");
+const fullNameEl = document.getElementById("fullName");
+const emailEl = document.getElementById("userEmail");
+const createdAtEl = document.getElementById("createdAt");
+const logoutBtn = document.getElementById("logoutBtn");
+
+function formatDate(ts) {
+  if (!ts) return "";
+  return new Date(ts).toLocaleString();
+}
+
+async function saveUser(user) {
+  const userRef = ref(db, "users/" + user.uid);
+  const snap = await get(userRef);
+  const profile = {
+    fullName: user.displayName || "",
+    email: user.email || "",
+    profileUrl: user.photoURL || ""
+  };
+  if (!snap.exists()) {
+    await set(userRef, { ...profile, createdAt: serverTimestamp() });
+  } else {
+    await update(userRef, profile);
+  }
+  const fresh = await get(userRef);
+  return fresh.val();
+}
+
+googleBtn.addEventListener("click", async () => {
+  loginMsg.textContent = "";
+  loginMsg.className = "msg";
+  googleBtn.disabled = true;
+  googleBtnText.textContent = "Signing in...";
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    loginMsg.textContent = e.message;
+    loginMsg.className = "msg err";
+  } finally {
+    googleBtn.disabled = false;
+    googleBtnText.textContent = "Continue with Google";
+  }
+});
+
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    loginView.classList.add("hidden");
+    profileView.classList.remove("hidden");
+    avatar.src = user.photoURL || "";
+    fullNameEl.textContent = user.displayName || "";
+    emailEl.textContent = user.email || "";
+    dbMsg.textContent = "Saving...";
+    dbMsg.className = "msg";
+    try {
+      const data = await saveUser(user);
+      createdAtEl.textContent = "Joined: " + formatDate(data.createdAt);
+      dbMsg.textContent = "Saved to database";
+      dbMsg.className = "msg ok";
+    } catch (e) {
+      dbMsg.textContent = e.message;
+      dbMsg.className = "msg err";
+    }
+  } else {
+    profileView.classList.add("hidden");
+    loginView.classList.remove("hidden");
+  }
+});
+</script>
+</body>
+</html>
