@@ -75,7 +75,6 @@
     color: var(--navy);
   }
 
-  /* Post card (built from layout/item_post.html) */
   .post {
     background: var(--card);
     border-radius: 28px;
@@ -200,7 +199,6 @@
   .action.like svg { stroke: #8a94a8; }
   .action.like.on svg { fill: var(--like); stroke: var(--like); }
 
-  /* Comments */
   .list { padding: 16px var(--gutter); display: flex; flex-direction: column; gap: 16px; }
 
   .c-row { display: flex; align-items: flex-start; gap: 12px; }
@@ -254,7 +252,6 @@
 
   .state { padding: 40px 16px; text-align: center; font-size: 0.98rem; color: var(--muted); }
 
-  /* Composer sticks to the bottom of the page column on every screen size */
   .composer {
     position: fixed;
     left: 0;
@@ -283,7 +280,7 @@
     background: var(--tint);
     color: var(--navy);
     font-family: inherit;
-    font-size: 1rem; /* 16px: stops iOS zooming on focus */
+    font-size: 1rem;
   }
 
   .composer input:focus { border-color: var(--blue); }
@@ -339,8 +336,24 @@
     .bubble { padding: 10px 12px; }
   }
 </style>
+<link rel="stylesheet" href="/css/sidebar.css">
 </head>
 <body>
+
+<nav class="side-nav" aria-label="Main">
+  <a class="nav-item active" href="/">
+    <svg class="fill-on-active" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8.5a.5.5 0 0 1-.5.5H15v-6H9v6H4.5a.5.5 0 0 1-.5-.5V11z"/></svg>
+    <span>Home</span>
+  </a>
+  <a class="nav-item" href="/#shorts">
+    <svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3.5"/><path d="M10 9.2v5.6l4.6-2.8L10 9.2z"/><path d="M8 4l2 3.2M13 4l2 3.2"/></svg>
+    <span>Shorts</span>
+  </a>
+  <a class="nav-item" href="/#subject">
+    <svg class="fill-on-active" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M5 16.5h14M9 20.5v-1.5M15 20.5v-1.5"/></svg>
+    <span>Subject</span>
+  </a>
+</nav>
 
 <header class="top-bar">
   <button class="back-btn" type="button" id="backBtn" aria-label="Back">
@@ -372,7 +385,7 @@
 <script src="/firebase-config.js"></script>
 <script>
   (function () {
-    var POST_TEMPLATE_URL = "/layout/item_post.html";
+    var POST_TEMPLATE_URL = "/html/item_post.html";
 
     var postId = qs("postId");
     var postBox = document.getElementById("postBox");
@@ -745,8 +758,6 @@
       }
     });
 
-    // Logged-out visitors are sent to the login sheet by /firebase-config.js
-    // and returned to this exact link afterwards (?next=).
     if (!postId) {
       composer.hidden = true;
       showState("Post not found.");
