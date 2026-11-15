@@ -1,106 +1,37 @@
 {
   "cleanUrls": false,
   "rewrites": [
-    {
-      "source": "/img/:path*",
-      "destination": "https://durbar-api.vercel.app/img/:path*"
-    },
-    {
-      "source": "/vid/:path*",
-      "destination": "https://durbar-api.vercel.app/vid/:path*"
-    },
-    {
-      "source": "/file/:path*",
-      "destination": "https://durbar-api.vercel.app/file/:path*"
-    },
-    {
-      "source": "/post/:id((?!index\\.html$)[^/]+)",
-      "destination": "/api/share?type=post&id=:id"
-    },
-    {
-      "source": "/post/:id((?!index\\.html$)[^/]+)/",
-      "destination": "/api/share?type=post&id=:id"
-    },
-    {
-      "source": "/durbar/post/:id((?!index\\.html$)[^/]+)",
-      "destination": "/api/share?type=post&id=:id"
-    },
-    {
-      "source": "/durbar/post/:id((?!index\\.html$)[^/]+)/",
-      "destination": "/api/share?type=post&id=:id"
-    },
-    {
-      "source": "/shorts/:id((?!index\\.html$)[^/]+)",
-      "destination": "/api/share?type=shorts&id=:id"
-    },
-    {
-      "source": "/shorts/:id((?!index\\.html$)[^/]+)/",
-      "destination": "/api/share?type=shorts&id=:id"
-    },
-    {
-      "source": "/durbar/shorts/:id((?!index\\.html$)[^/]+)",
-      "destination": "/api/share?type=shorts&id=:id"
-    },
-    {
-      "source": "/durbar/shorts/:id((?!index\\.html$)[^/]+)/",
-      "destination": "/api/share?type=shorts&id=:id"
-    },
-    {
-      "source": "/user/:id((?!index\\.html$)[^/]+)",
-      "destination": "/api/share?type=user&id=:id"
-    },
-    {
-      "source": "/user/:id((?!index\\.html$)[^/]+)/",
-      "destination": "/api/share?type=user&id=:id"
-    },
-    {
-      "source": "/durbar/user/:id((?!index\\.html$)[^/]+)",
-      "destination": "/api/share?type=user&id=:id"
-    },
-    {
-      "source": "/durbar/user/:id((?!index\\.html$)[^/]+)/",
-      "destination": "/api/share?type=user&id=:id"
-    }
+    { "source": "/post/:id", "destination": "/api/share?type=post&id=:id" },
+    { "source": "/post/:id/", "destination": "/api/share?type=post&id=:id" },
+    { "source": "/durbar/post/:id", "destination": "/api/share?type=post&id=:id" },
+    { "source": "/durbar/post/:id/", "destination": "/api/share?type=post&id=:id" },
+    { "source": "/shorts/:id", "destination": "/api/share?type=shorts&id=:id" },
+    { "source": "/shorts/:id/", "destination": "/api/share?type=shorts&id=:id" },
+    { "source": "/durbar/shorts/:id", "destination": "/api/share?type=shorts&id=:id" },
+    { "source": "/durbar/shorts/:id/", "destination": "/api/share?type=shorts&id=:id" },
+    { "source": "/user/:id", "destination": "/api/share?type=user&id=:id" },
+    { "source": "/user/:id/", "destination": "/api/share?type=user&id=:id" },
+    { "source": "/durbar/user/:id", "destination": "/api/share?type=user&id=:id" },
+    { "source": "/durbar/user/:id/", "destination": "/api/share?type=user&id=:id" }
   ],
   "headers": [
     {
       "source": "/post",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, must-revalidate"
-        }
-      ]
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
     },
     {
       "source": "/post/",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, must-revalidate"
-        }
-      ]
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
     },
     {
       "source": "/post/index.html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, must-revalidate"
-        }
-      ]
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
     },
     {
       "source": "/.well-known/assetlinks.json",
       "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/json"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
     }
   ]

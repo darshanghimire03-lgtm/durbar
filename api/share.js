@@ -1,6 +1,5 @@
 const DB = "https://darbarhigh-4c642-default-rtdb.firebaseio.com";
-const SITE = "https://adarshghimire1.com.np";
-const DEFAULT_IMAGE = SITE + "/favicon.png";
+const FALLBACK_SITE = "https://durbar-plus2.vercel.app";
 const TICK_PATH = "M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z";
 
 function esc(value) {
@@ -15,6 +14,14 @@ function esc(value) {
 function shorten(text, max) {
   const clean = String(text || "").replace(/\s+/g, " ").trim();
   return clean.length > max ? clean.slice(0, max - 1).trimEnd() + "…" : clean;
+}
+
+function getSite(req) {
+  const raw = String((req.headers && (req.headers["x-forwarded-host"] || req.headers.host)) || "");
+  const host = raw.split(",")[0].trim().toLowerCase();
+  if (!/^[a-z0-9.-]+(:\d{1,5})?$/.test(host)) return FALLBACK_SITE;
+  const proto = /^(localhost|127\.0\.0\.1)(:|$)/.test(host) ? "http" : "https";
+  return proto + "://" + host;
 }
 
 function cloudinaryImage(url, transform) {
@@ -191,16 +198,16 @@ function metaTags(opts) {
     '<meta name="twitter:image" content="' + esc(opts.image) + '">';
 }
 
-function wrapPage(title, meta, bodyHtml, redirectTo) {
+function wrapPage(site, title, meta, bodyHtml, redirectTo) {
   const safeJs = function (v) { return JSON.stringify(v).replace(/</g, "\\u003c"); };
   const script = redirectTo
     ? "<script>try{window.location.replace(" + safeJs(redirectTo) + ")}catch(e){window.location.href=" + safeJs(redirectTo) + "}</script>" +
-      "<noscript><meta http-equiv=\"refresh\" content=\"0;url=" + esc(redirectTo) + "\"></noscript>"
+      '<noscript><meta http-equiv="refresh" content="0;url=' + esc(redirectTo) + '"></noscript>'
     : "";
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     "<title>" + esc(title) + "</title>" + meta +
-    '<link rel="icon" href="' + esc(DEFAULT_IMAGE) + '">' +
+    '<link rel="icon" href="' + esc(site + "/favicon.png") + '">' +
     "<style>" + baseStyle + "</style></head><body>" + bodyHtml + script + "</body></html>";
 }
 
@@ -215,9 +222,10 @@ function possessive(name) {
   return name + "'s";
 }
 
-function renderPost(id, post) {
-  const pageUrl = SITE + "/post/" + id;
-  const target = id === "invalid" ? SITE + "/" : SITE + "/comment.html?postId=" + encodeURIComponent(id);
+function renderPost(site, id, post) {
+  const defaultImage = site + "/favicon.png";
+  const pageUrl = site + "/post/" + id;
+  const target = id === "invalid" ? "/" : "/comment.html?postId=" + encodeURIComponent(id);
   const name = post && post.authorName ? post.authorName : "Durbar User";
   const role = post && post.authorRole ? post.authorRole : "";
   const body = post ? shorten(post.text, 300) : "";
@@ -227,7 +235,7 @@ function renderPost(id, post) {
   const photoSmall = rawPhoto ? circleImage(rawPhoto, 200) : "";
   const postImagePage = rawImage ? cloudinaryImage(rawImage, "w_1200,h_630,c_fill,q_auto,f_jpg") : "";
   const hasImage = !!rawImage;
-  const image = hasImage ? postPreviewImage(rawImage, rawPhoto) : (photoSmall || DEFAULT_IMAGE);
+  const image = hasImage ? postPreviewImage(rawImage, rawPhoto) : (photoSmall || defaultImage);
   const title = post ? possessive(name) + " post on Durbar" : "Post on Durbar";
   const description = body || (post ? (hasImage ? "Shared a photo on Durbar" : "Shared a post on Durbar") : "Open this post in the Durbar app");
 
@@ -246,7 +254,7 @@ function renderPost(id, post) {
     '<a class="btn" href="' + esc(target) + '">View post</a>' +
     '<div class="brand">Durbar Learning Platform</div></div>';
 
-  return wrapPage(title, metaTags({
+  return wrapPage(site, title, metaTags({
     title: title,
     description: description,
     image: image,
@@ -258,9 +266,10 @@ function renderPost(id, post) {
   }), html, target);
 }
 
-function renderShort(id, short) {
-  const pageUrl = SITE + "/shorts/" + id;
-  const target = id === "invalid" ? SITE + "/" : SITE + "/shorts/?id=" + encodeURIComponent(id);
+function renderShort(site, id, short) {
+  const defaultImage = site + "/favicon.png";
+  const pageUrl = site + "/shorts/" + id;
+  const target = id === "invalid" ? "/" : "/shorts/?id=" + encodeURIComponent(id);
   const shortTitle = short && short.title ? shorten(short.title, 90) : "";
   const subject = short && short.relatedSubject ? short.relatedSubject : "";
   const thumb = short ? videoThumbnail(short.videoUrl) : "";
@@ -268,7 +277,7 @@ function renderShort(id, short) {
   const description = shortTitle && subject
     ? subject + " • Watch this short on Durbar"
     : "Watch this short on Durbar";
-  const image = thumb || DEFAULT_IMAGE;
+  const image = thumb || defaultImage;
 
   const html =
     '<div class="card">' +
@@ -278,7 +287,7 @@ function renderShort(id, short) {
     '<a class="btn" href="' + esc(target) + '">Watch short</a>' +
     '<div class="brand">Durbar Learning Platform</div></div>';
 
-  return wrapPage(title, metaTags({
+  return wrapPage(site, title, metaTags({
     title: title,
     description: description,
     image: image,
@@ -290,9 +299,10 @@ function renderShort(id, short) {
   }), html, target);
 }
 
-function renderUser(id, user) {
-  const pageUrl = SITE + "/durbar/user/" + id;
-  const target = id === "invalid" ? SITE + "/" : SITE + "/profile/?uid=" + encodeURIComponent(id);
+function renderUser(site, id, user) {
+  const defaultImage = site + "/favicon.png";
+  const pageUrl = site + "/user/" + id;
+  const target = id === "invalid" ? "/" : "/profile/?uid=" + encodeURIComponent(id);
   const name = user && user.name ? user.name : "Durbar User";
   const role = user ? capitalize(user.role) : "";
   const isModerator = role.toLowerCase() === "moderator";
@@ -301,7 +311,7 @@ function renderUser(id, user) {
   const pagePhoto = photo ? cloudinaryImage(photo, "w_400,h_400,c_fill,g_face,q_auto,f_jpg") : "";
   const title = user ? name + " on Durbar" : "Profile on Durbar";
   const description = role ? role + " • View profile on Durbar" : "View profile on Durbar";
-  const image = circle || DEFAULT_IMAGE;
+  const image = circle || defaultImage;
 
   const avatar = pagePhoto
     ? '<img class="avatar" src="' + esc(pagePhoto) + '" alt="">'
@@ -319,7 +329,7 @@ function renderUser(id, user) {
     '<a class="btn" href="' + esc(target) + '">View profile</a>' +
     '<div class="brand">Durbar Learning Platform</div></div>';
 
-  return wrapPage(title, metaTags({
+  return wrapPage(site, title, metaTags({
     title: title,
     description: description,
     image: image,
@@ -332,6 +342,7 @@ function renderUser(id, user) {
 }
 
 module.exports = async function handler(req, res) {
+  const site = getSite(req);
   const type = String((req.query && req.query.type) || "");
   let id = String((req.query && req.query.id) || "");
   try { id = decodeURIComponent(id); } catch (e) {}
@@ -339,27 +350,28 @@ module.exports = async function handler(req, res) {
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+  res.setHeader("Vary", "Host, X-Forwarded-Host");
 
   const validId = /^[A-Za-z0-9_-]{1,64}$/.test(id);
 
   if (type === "post") {
     const post = validId ? await loadPost(id) : null;
-    res.status(200).send(renderPost(validId ? id : "invalid", post));
+    res.status(200).send(renderPost(site, validId ? id : "invalid", post));
     return;
   }
 
   if (type === "shorts") {
     const short = validId ? await loadNode("shorts/" + encodeURIComponent(id)) : null;
-    res.status(200).send(renderShort(validId ? id : "invalid", short));
+    res.status(200).send(renderShort(site, validId ? id : "invalid", short));
     return;
   }
 
   if (type === "user") {
     const validUid = /^[A-Za-z0-9_-]{1,128}$/.test(id);
     const user = validUid ? await loadUser(id) : null;
-    res.status(200).send(renderUser(validUid ? id : "invalid", user));
+    res.status(200).send(renderUser(site, validUid ? id : "invalid", user));
     return;
   }
 
-  res.status(404).send(wrapPage("Durbar", "", '<div class="card"><p class="text">Page not found</p><a class="btn" href="/">Go to Durbar</a></div>', null));
+  res.status(404).send(wrapPage(site, "Durbar", "", '<div class="card"><p class="text">Page not found</p><a class="btn" href="/">Go to Durbar</a></div>', null));
 };

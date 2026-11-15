@@ -8,17 +8,17 @@
 <meta property="og:site_name" content="Durbar">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Durbar">
-<meta property="og:description" content="Open this link in Durbar — notes, posts and shorts for students.">
-<meta property="og:image" content="https://adarshghimire1.com.np/favicon.png">
+<meta property="og:description" content="Durbar Learning Platform — notes, posts and shorts for students.">
+<meta property="og:image" content="https://durbar-plus2.vercel.app/favicon.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Durbar">
-<meta name="twitter:description" content="Open this link in Durbar — notes, posts and shorts for students.">
-<meta name="twitter:image" content="https://adarshghimire1.com.np/favicon.png">
+<meta name="twitter:description" content="Durbar Learning Platform — notes, posts and shorts for students.">
+<meta name="twitter:image" content="https://durbar-plus2.vercel.app/favicon.png">
+<link rel="icon" type="image/png" href="/favicon.png">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: radial-gradient(circle at 50% 40%, #ffffff 0%, #eef1f6 60%, #e4e8f0 100%); color: #1a1a1a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
-  .page { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 32px; text-align: center; }
-  .page.show { display: flex; }
+  .page { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 32px; text-align: center; }
   .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.5; z-index: 0; pointer-events: none; }
   .blob.one { width: 340px; height: 340px; background: radial-gradient(circle, #ffd9a8, transparent 70%); top: -80px; left: -80px; animation: float1 14s ease-in-out infinite; }
   .blob.two { width: 400px; height: 400px; background: radial-gradient(circle, #b8d8ff, transparent 70%); bottom: -140px; right: -100px; animation: float2 16s ease-in-out infinite; }
@@ -72,11 +72,6 @@
   .home-btn:active { transform: translateY(0) scale(0.98); }
   .home-btn svg { width: 16px; height: 16px; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-  .spinner { width: 46px; height: 46px; border-radius: 50%; border: 3px solid rgba(0,0,0,0.08); border-top-color: #f59e0b; border-right-color: #ef4444; border-bottom-color: #a855f7; animation: spin 0.9s linear infinite; margin: 0 auto 18px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .redirecting-text { font-size: 15px; color: #555; margin-bottom: 6px; }
-  .manual-link { font-size: 13px; color: #999; text-decoration: underline; margin-top: 10px; display: inline-block; }
-  .manual-link:hover { color: #111; }
   .wand { position: fixed; inset: 0; pointer-events: none; z-index: 1; background: radial-gradient(2px 2px at 20% 30%, rgba(245,158,11,0.9), transparent 60%), radial-gradient(2px 2px at 80% 20%, rgba(239,68,68,0.8), transparent 60%), radial-gradient(2px 2px at 65% 75%, rgba(59,130,246,0.8), transparent 60%), radial-gradient(2px 2px at 35% 85%, rgba(168,85,247,0.8), transparent 60%), radial-gradient(1.5px 1.5px at 10% 60%, rgba(245,158,11,0.7), transparent 60%), radial-gradient(1.5px 1.5px at 90% 55%, rgba(239,68,68,0.7), transparent 60%); animation: wandTwinkle 4s ease-in-out infinite; opacity: 0.9; }
   @keyframes wandTwinkle { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.03); } }
 </style>
@@ -89,15 +84,7 @@
 
 <div class="wand"></div>
 
-<div id="redirecting" class="page">
-  <div class="content">
-    <div class="spinner"></div>
-    <div class="redirecting-text" id="redirectingText">Opening…</div>
-    <a id="manualLink" class="manual-link" href="#">Tap here if not redirected</a>
-  </div>
-</div>
-
-<div id="genericNotFound" class="page">
+<div class="page">
   <div class="content">
     <div class="stage">
       <div class="glow"></div>
@@ -147,57 +134,6 @@
     </a>
   </div>
 </div>
-
-<script>
-(function () {
-  function dec(v) { try { return decodeURIComponent(v); } catch (e) { return v; } }
-  function clean(v) { return /^[A-Za-z0-9_-]{1,128}$/.test(v) ? v : ""; }
-
-  var path = window.location.pathname || "";
-  var query = new URLSearchParams(window.location.search || "");
-
-  var target = null;
-  var label = "Opening…";
-
-  var postMatch = path.match(/^(?:\/durbar)?\/post\/([^\/?#]+)/i);
-  var shortMatch = path.match(/^(?:\/durbar)?\/shorts\/([^\/?#]+)/i);
-  var userMatch = path.match(/^(?:\/durbar)?\/user\/([^\/?#]+)/i);
-
-  var postId = postMatch ? clean(dec(postMatch[1])) : "";
-  var shortId = shortMatch ? clean(dec(shortMatch[1])) : "";
-  var userId = userMatch ? clean(dec(userMatch[1])) : "";
-
-  if (postId && !/^index\.html?$/i.test(postId)) {
-    target = "/comment.html?postId=" + encodeURIComponent(postId);
-    label = "Opening post…";
-  } else if (shortId && !/^index\.html?$/i.test(shortId)) {
-    target = "/shorts/?id=" + encodeURIComponent(shortId);
-    label = "Opening short…";
-  } else if (userId) {
-    target = "/profile/?uid=" + encodeURIComponent(userId);
-    label = "Opening profile…";
-  } else if (/\/shorts\/?$/i.test(path) && clean(query.get("id") || "")) {
-    target = "/shorts/?id=" + encodeURIComponent(query.get("id"));
-    label = "Opening short…";
-  } else if (/\/post\/?$/i.test(path) && clean(query.get("id") || "")) {
-    target = "/comment.html?postId=" + encodeURIComponent(query.get("id"));
-    label = "Opening post…";
-  }
-
-  // Never redirect to the page we are already on (prevents loops)
-  if (target && target.split("?")[0] === path) target = null;
-
-  if (target) {
-    document.getElementById("redirecting").classList.add("show");
-    document.getElementById("redirectingText").textContent = label;
-    document.getElementById("manualLink").href = target;
-    try { window.location.replace(target); }
-    catch (e) { window.location.href = target; }
-  } else {
-    document.getElementById("genericNotFound").classList.add("show");
-  }
-})();
-</script>
 
 </body>
 </html>
