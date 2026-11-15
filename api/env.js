@@ -10,7 +10,7 @@ const auth = firebase.auth();
 
 const SUBJECTS = ["Economic", "Account", "Computer Science", "English", "Nepali"];
 
-const IS_AUTH_PAGE = /(^|\/)(auth(\.html)?|reset-password(\/(index\.html)?)?)$/.test(location.pathname);
+const IS_AUTH_PAGE = /^\/(index(\.html)?)?$/.test(location.pathname) || /(^|\/)reset-password(\/(index\.html)?)?$/.test(location.pathname);
 
 if (!IS_AUTH_PAGE) {
   document.documentElement.style.visibility = "hidden";
@@ -20,13 +20,13 @@ if (!IS_AUTH_PAGE) {
       return;
     }
     const here = location.pathname + location.search + location.hash;
-    location.replace("/auth.html?next=" + encodeURIComponent(here));
+    location.replace("/?next=" + encodeURIComponent(here));
   });
 }
 
 function logout() {
   return auth.signOut().then(function () {
-    location.replace("/auth.html");
+    location.replace("/");
   });
 }
 
