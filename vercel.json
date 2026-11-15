@@ -1,6 +1,10 @@
 {
   "cleanUrls": false,
   "rewrites": [
+    { "source": "/firebase-config.js", "destination": "/api/env?bundle=1" },
+    { "source": "/img/:path*", "destination": "https://durbar-api.vercel.app/img/:path*" },
+    { "source": "/vid/:path*", "destination": "https://durbar-api.vercel.app/vid/:path*" },
+    { "source": "/file/:path*", "destination": "https://durbar-api.vercel.app/file/:path*" },
     { "source": "/post/:id", "destination": "/api/share?type=post&id=:id" },
     { "source": "/post/:id/", "destination": "/api/share?type=post&id=:id" },
     { "source": "/durbar/post/:id", "destination": "/api/share?type=post&id=:id" },
