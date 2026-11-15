@@ -1,11 +1,15 @@
 {
   "cleanUrls": false,
   "redirects": [
-    { "source": "/comment.html", "destination": "/layout/comment.html", "permanent": true },
-    { "source": "/unit.html", "destination": "/layout/unit.html", "permanent": true },
-    { "source": "/notes.html", "destination": "/layout/notes.html", "permanent": true },
-    { "source": "/photo.html", "destination": "/layout/photo.html", "permanent": true },
-    { "source": "/pdf.html", "destination": "/layout/pdf.html", "permanent": true }
+    { "source": "/comment.html", "destination": "/html/comment.html", "permanent": true },
+    { "source": "/unit.html", "destination": "/html/unit.html", "permanent": true },
+    { "source": "/notes.html", "destination": "/html/notes.html", "permanent": true },
+    { "source": "/photo.html", "destination": "/html/photo.html", "permanent": true },
+    { "source": "/pdf.html", "destination": "/html/pdf.html", "permanent": true },
+    { "source": "/layout/:path*", "destination": "/html/:path*", "permanent": true },
+    { "source": "/profile", "destination": "/html/profile.html", "permanent": true },
+    { "source": "/profile/", "destination": "/html/profile.html", "permanent": true },
+    { "source": "/profile/index.html", "destination": "/html/profile.html", "permanent": true }
   ],
   "rewrites": [
     { "source": "/firebase-config.js", "destination": "/api/env?bundle=1" },
