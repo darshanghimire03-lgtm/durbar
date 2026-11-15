@@ -28,8 +28,8 @@
   function buildSubjectCard(subjectName) {
     var subjectKey = sanitizeKey(subjectName);
     var a = el("a", "subject-card");
-    a.href = "unit.html?subjectName=" + encodeURIComponent(subjectName) +
-             "&subjectKey=" + encodeURIComponent(subjectKey);
+     a.href = "/layout/unit.html?subjectName=" + encodeURIComponent(subjectName) +
+         "&subjectKey=" + encodeURIComponent(subjectKey);
 
     var icon = el("span", "subject-icon");
     icon.appendChild(iconSvg(BOOK_PATH));

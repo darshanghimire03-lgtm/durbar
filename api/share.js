@@ -225,7 +225,7 @@ function possessive(name) {
 function renderPost(site, id, post) {
   const defaultImage = site + "/favicon.png";
   const pageUrl = site + "/post/" + id;
-  const target = id === "invalid" ? "/" : "/comment.html?postId=" + encodeURIComponent(id);
+  const target = id === "invalid" ? "/" : "/layout/comment.html?postId=" + encodeURIComponent(id);
   const name = post && post.authorName ? post.authorName : "Durbar User";
   const role = post && post.authorRole ? post.authorRole : "";
   const body = post ? shorten(post.text, 300) : "";

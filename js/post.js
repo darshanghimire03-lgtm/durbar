@@ -192,7 +192,7 @@
     });
 
     card.querySelector(".action.comment").addEventListener("click", function () {
-      location.href = "comment.html?postId=" + encodeURIComponent(post.id);
+location.href = "/layout/comment.html?postId=" + encodeURIComponent(post.id);
     });
 
     return card;

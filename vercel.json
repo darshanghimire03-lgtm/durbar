@@ -1,5 +1,12 @@
 {
   "cleanUrls": false,
+  "redirects": [
+    { "source": "/comment.html", "destination": "/layout/comment.html", "permanent": true },
+    { "source": "/unit.html", "destination": "/layout/unit.html", "permanent": true },
+    { "source": "/notes.html", "destination": "/layout/notes.html", "permanent": true },
+    { "source": "/photo.html", "destination": "/layout/photo.html", "permanent": true },
+    { "source": "/pdf.html", "destination": "/layout/pdf.html", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/firebase-config.js", "destination": "/api/env?bundle=1" },
     { "source": "/post/:id", "destination": "/api/share?type=post&id=:id" },

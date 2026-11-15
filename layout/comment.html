@@ -2,60 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#ffffff">
 <title>Comments — Durbar</title>
-<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" type="image/png" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="/img-fix.js"></script>
+<link rel="stylesheet" href="/css/pages.css">
 <style>
   :root {
-    --bg: #ffffff;
     --card: #eaf1fd;
-    --navy: #0c1f4a;
-    --blue: #1f4aa8;
-    --muted: #6b7a99;
-    --line: #cfd9ec;
     --like: #e53935;
-    --tint: #e6eefc;
-    --tint-line: #d3dff5;
+    --page-w: 720px;
   }
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
+  body { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
 
-  [hidden] {
-    display: none !important;
-  }
-
-  html, body {
-    background: var(--bg);
-  }
-
-  body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    color: #111827;
-    max-width: 520px;
-    margin: 0 auto;
-    min-height: 100vh;
-    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  @media (min-width: 721px) {
+    body { box-shadow: 0 0 0 1px #eef2fa; }
   }
 
   .top-bar {
-    position: sticky;
-    top: 0;
     z-index: 20;
-    display: flex;
-    align-items: center;
     gap: 12px;
-    padding: calc(14px + env(safe-area-inset-top)) 16px 14px 16px;
-    background: var(--bg);
+    padding-bottom: 14px;
     border-bottom: 1.5px solid var(--line);
   }
 
@@ -83,35 +55,34 @@
     stroke-linejoin: round;
   }
 
+  @media (hover: hover) {
+    .back-btn:hover { background: #d9e5fb; }
+  }
+
   .title {
-    font-size: 1.35rem;
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
     font-weight: 700;
     color: var(--navy);
     letter-spacing: -0.01em;
   }
 
-  .post-box {
-    padding: 16px 16px 0 16px;
-  }
+  .post-box { padding: 16px var(--gutter) 0 var(--gutter); }
 
   .section-label {
-    padding: 20px 20px 0 20px;
+    padding: 20px var(--gutter) 0 var(--gutter);
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--navy);
   }
 
+  /* Post card (built from layout/item_post.html) */
   .post {
     background: var(--card);
     border-radius: 28px;
-    padding: 18px 18px 14px 18px;
+    padding: clamp(16px, 3vw, 24px) clamp(16px, 3vw, 24px) 14px;
   }
 
-  .post-head {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .post-head { display: flex; align-items: center; gap: 12px; }
 
   .avatar {
     width: 46px;
@@ -127,23 +98,10 @@
     justify-content: center;
   }
 
-  .avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  .who {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .name-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .who { flex: 1; min-width: 0; }
+  .name-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
 
   .name {
     font-size: 1.12rem;
@@ -154,16 +112,8 @@
     text-overflow: ellipsis;
   }
 
-  .badge {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    fill: #1d9bf0;
-  }
-
-  .badge.grey {
-    fill: #7b8190;
-  }
+  .badge { width: 20px; height: 20px; flex-shrink: 0; fill: #1d9bf0; }
+  .badge.grey { fill: #7b8190; }
 
   .meta {
     font-size: 0.9rem;
@@ -174,16 +124,13 @@
     text-overflow: ellipsis;
   }
 
-  .meta .role {
-    color: var(--blue);
-    font-weight: 500;
-  }
+  .meta .role { color: var(--blue); font-weight: 500; }
 
   .menu-btn {
     border: none;
     background: transparent;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -192,11 +139,7 @@
     flex-shrink: 0;
   }
 
-  .menu-btn svg {
-    width: 22px;
-    height: 22px;
-    fill: currentColor;
-  }
+  .menu-btn svg { width: 22px; height: 22px; fill: currentColor; }
 
   .post-text {
     margin-top: 18px;
@@ -204,35 +147,24 @@
     line-height: 1.55;
     color: #1a1f2b;
     white-space: pre-wrap;
-    word-break: break-word;
     overflow-wrap: anywhere;
   }
 
-  .post-text a {
-    color: var(--blue);
-  }
+  .post-text a { color: var(--blue); }
 
   .post-image {
     display: block;
     width: 100%;
-    max-height: 420px;
+    max-height: min(60vh, 520px);
     object-fit: cover;
     border-radius: 18px;
     margin-top: 14px;
     background: #d9e3f6;
   }
 
-  .divider {
-    height: 1.5px;
-    background: var(--line);
-    margin: 16px 0 6px 0;
-  }
+  .divider { height: 1.5px; background: var(--line); margin: 16px 0 6px 0; }
 
-  .actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .actions { display: flex; align-items: center; gap: 6px; }
 
   .action {
     border: none;
@@ -241,6 +173,7 @@
     align-items: center;
     gap: 6px;
     padding: 8px 10px;
+    min-height: 44px;
     border-radius: 14px;
     cursor: pointer;
     font-family: inherit;
@@ -259,31 +192,18 @@
     stroke-linejoin: round;
   }
 
-  .action.like {
-    cursor: default;
+  @media (hover: hover) {
+    .action:hover:not(.like) { background: rgba(12, 31, 74, 0.06); }
   }
 
-  .action.like svg {
-    stroke: #8a94a8;
-  }
+  .action.like { cursor: default; }
+  .action.like svg { stroke: #8a94a8; }
+  .action.like.on svg { fill: var(--like); stroke: var(--like); }
 
-  .action.like.on svg {
-    fill: var(--like);
-    stroke: var(--like);
-  }
+  /* Comments */
+  .list { padding: 16px var(--gutter); display: flex; flex-direction: column; gap: 16px; }
 
-  .list {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .c-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-  }
+  .c-row { display: flex; align-items: flex-start; gap: 12px; }
 
   .c-avatar {
     width: 42px;
@@ -299,12 +219,7 @@
     font-weight: 700;
   }
 
-  .c-avatar img {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-  }
+  .c-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
 
   .bubble {
     flex: 1;
@@ -314,11 +229,7 @@
     background: var(--card);
   }
 
-  .c-head {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
+  .c-head { display: flex; align-items: baseline; gap: 8px; }
 
   .c-name {
     min-width: 0;
@@ -330,11 +241,7 @@
     text-overflow: ellipsis;
   }
 
-  .c-time {
-    flex-shrink: 0;
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
+  .c-time { flex-shrink: 0; font-size: 0.8rem; color: var(--muted); }
 
   .c-text {
     margin-top: 4px;
@@ -342,29 +249,25 @@
     line-height: 1.5;
     color: #1a1f2b;
     white-space: pre-wrap;
-    word-break: break-word;
     overflow-wrap: anywhere;
   }
 
-  .state {
-    padding: 40px 16px;
-    text-align: center;
-    font-size: 0.98rem;
-    color: var(--muted);
-  }
+  .state { padding: 40px 16px; text-align: center; font-size: 0.98rem; color: var(--muted); }
 
+  /* Composer sticks to the bottom of the page column on every screen size */
   .composer {
     position: fixed;
-    left: 50%;
+    left: 0;
+    right: 0;
     bottom: 0;
-    transform: translateX(-50%);
+    margin: 0 auto;
     z-index: 30;
     width: 100%;
-    max-width: 520px;
+    max-width: var(--page-w);
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 12px calc(10px + env(safe-area-inset-bottom)) 12px;
+    padding: 10px calc(12px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
     background: #fdfdff;
     box-shadow: 0 -1px 0 rgba(12, 31, 74, 0.06), 0 -6px 18px rgba(12, 31, 74, 0.05);
   }
@@ -380,12 +283,11 @@
     background: var(--tint);
     color: var(--navy);
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 1rem; /* 16px: stops iOS zooming on focus */
   }
 
-  .composer input::placeholder {
-    color: var(--muted);
-  }
+  .composer input:focus { border-color: var(--blue); }
+  .composer input::placeholder { color: var(--muted); }
 
   .send-btn {
     width: 48px;
@@ -401,9 +303,7 @@
     cursor: pointer;
   }
 
-  .send-btn:disabled {
-    opacity: 0.5;
-  }
+  .send-btn:disabled { opacity: 0.5; }
 
   .send-btn svg {
     width: 22px;
@@ -431,14 +331,12 @@
     text-align: center;
   }
 
-  .toast.show {
-    display: block;
-  }
+  .toast.show { display: block; }
 
-  @media (min-width: 521px) {
-    body {
-      box-shadow: 0 0 0 1px #eef2fa;
-    }
+  @media (max-width: 360px) {
+    .post { border-radius: 22px; }
+    .post-text { font-size: 1rem; }
+    .bubble { padding: 10px 12px; }
   }
 </style>
 </head>
@@ -460,21 +358,21 @@
 </main>
 
 <div class="composer" id="composer">
-  <input type="text" id="commentInput" placeholder="Add a comment" maxlength="500" autocomplete="off">
+  <input type="text" id="commentInput" placeholder="Add a comment" maxlength="500" autocomplete="off" enterkeyhint="send" aria-label="Add a comment">
   <button class="send-btn" type="button" id="sendBtn" aria-label="Send">
     <svg viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-3-6.5L4 12zM11 13.5L20 4"/></svg>
   </button>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="/firebase-config.js"></script>
 <script>
   (function () {
-    var POST_TEMPLATE_URL = "layout/item_post.html";
+    var POST_TEMPLATE_URL = "/layout/item_post.html";
 
     var postId = qs("postId");
     var postBox = document.getElementById("postBox");
@@ -847,13 +745,8 @@
       }
     });
 
-
-    // Logged-out visitors: go to login, then come back to this exact link
-    setTimeout(function () {
-      if (!auth.currentUser) {
-        location.replace("/auth.html?next=" + encodeURIComponent(location.pathname + location.search));
-      }
-    }, 2500);
+    // Logged-out visitors are sent to the login sheet by /firebase-config.js
+    // and returned to this exact link afterwards (?next=).
     if (!postId) {
       composer.hidden = true;
       showState("Post not found.");

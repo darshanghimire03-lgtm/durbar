@@ -5,135 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <title>Durbar</title>
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/img-fix.js"></script>
+<link rel="stylesheet" href="/css/pages.css">
 <style>
-  :root {
-    --navy: #0c1f4a;
-    --muted: #8a96b0;
-    --tint: #e6eefc;
-    --card: #f3f7ff;
-    --line: #dfe6f3;
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  html, body {
-    background: #ffffff;
-  }
-
-  body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    color: #111827;
-    max-width: 520px;
-    margin: 0 auto;
-    min-height: 100vh;
-    padding-bottom: calc(32px + env(safe-area-inset-bottom));
-  }
-
-  .top-bar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: calc(16px + env(safe-area-inset-top)) 16px 14px 16px;
-  }
-
-  .round-btn {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: var(--tint);
-    border: none;
-    color: var(--navy);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    text-decoration: none;
-  }
-
-  .round-btn svg {
-    width: 22px;
-    height: 22px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2.2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .page-title {
-    flex: 1;
-    min-width: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--navy);
-    letter-spacing: -0.01em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   .notes-list {
-    padding: 6px 16px 0 16px;
-    display: flex;
-    flex-direction: column;
+    padding: 6px var(--gutter) 0 var(--gutter);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
+    align-items: start;
   }
+
+  .skeleton { height: 150px; border-radius: 28px; }
 
   .note-card {
     background: var(--card);
     border-radius: 28px;
-    padding: 20px 20px 20px 20px;
+    padding: clamp(16px, 3vw, 24px);
+    min-width: 0;
   }
 
   .note-title {
-    font-size: 1.2rem;
+    font-size: clamp(1.1rem, 1rem + 0.4vw, 1.3rem);
     font-weight: 700;
     color: var(--navy);
     line-height: 1.3;
-    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
-  .note-divider {
-    height: 1.5px;
-    background: var(--line);
-    margin: 16px 0 16px 0;
-  }
+  .note-divider { height: 1.5px; background: var(--line); margin: 16px 0; }
 
   .note-description {
     font-size: 0.98rem;
     line-height: 1.55;
     color: #3a4560;
     white-space: pre-wrap;
-    word-break: break-word;
+    overflow-wrap: anywhere;
     margin-bottom: 14px;
   }
 
-  .media-section {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .media-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+  .media-section { display: flex; flex-direction: column; gap: 16px; }
+  .media-group { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 
   .media-label {
     font-size: 0.8rem;
@@ -143,21 +60,22 @@
     letter-spacing: 0.06em;
   }
 
-  .file-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
+  /* Files */
+  .file-list { display: flex; flex-direction: column; gap: 16px; }
 
   .file-row {
     display: flex;
     align-items: center;
     gap: 16px;
     cursor: pointer;
+    min-width: 0;
+    border-radius: 18px;
   }
 
-  .file-row:active {
-    opacity: 0.7;
+  .file-row:active { opacity: 0.7; }
+
+  @media (hover: hover) {
+    .file-row:hover .file-name { text-decoration: underline; }
   }
 
   .file-icon {
@@ -171,31 +89,17 @@
     background: linear-gradient(135deg, #ff7a6b, #e53935);
   }
 
-  .file-icon.word {
-    background: linear-gradient(135deg, #5b8def, #2a56c6);
-  }
+  .file-icon.word { background: linear-gradient(135deg, #5b8def, #2a56c6); }
+  .file-icon.file { background: linear-gradient(135deg, #8d9bb5, #5d6b88); }
+  .file-icon svg { width: 26px; height: 26px; fill: #ffffff; }
 
-  .file-icon.file {
-    background: linear-gradient(135deg, #8d9bb5, #5d6b88);
-  }
-
-  .file-icon svg {
-    width: 26px;
-    height: 26px;
-    fill: #ffffff;
-  }
-
-  .file-info {
-    flex: 1;
-    min-width: 0;
-  }
+  .file-info { flex: 1; min-width: 0; }
 
   .file-name {
     font-size: 1.05rem;
     font-weight: 600;
     color: var(--navy);
     line-height: 1.3;
-    word-break: break-word;
     overflow-wrap: anywhere;
   }
 
@@ -208,13 +112,14 @@
     gap: 8px;
   }
 
-  .file-meta .dot {
-    font-size: 0.7rem;
-  }
+  .file-meta .dot { font-size: 0.7rem; }
 
+  /* Photo collage: scales with the card, never a fixed pixel height */
   .photo-collage {
     display: grid;
     gap: 4px;
+    width: 100%;
+    max-height: 480px;
     border-radius: 18px;
     overflow: hidden;
     background: #e3ebf8;
@@ -226,69 +131,41 @@
     position: relative;
     overflow: hidden;
     background: #d5e0f3;
-    min-height: 110px;
+    min-width: 0;
+    min-height: 0;
   }
 
   .photo-collage .collage-item img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
   }
 
-  .photo-collage.layout-1 {
-    grid-template-columns: 1fr;
-  }
-
-  .photo-collage.layout-1 .collage-item {
-    min-height: 200px;
-  }
-
-  .photo-collage.layout-2 {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .photo-collage.layout-2 .collage-item {
-    min-height: 150px;
-  }
+  .photo-collage.layout-1 { grid-template-columns: 1fr; aspect-ratio: 16 / 10; }
+  .photo-collage.layout-2 { grid-template-columns: 1fr 1fr; aspect-ratio: 16 / 9; }
 
   .photo-collage.layout-3 {
     grid-template-columns: 2fr 1fr;
     grid-template-rows: 1fr 1fr;
+    aspect-ratio: 16 / 10;
   }
-
-  .photo-collage.layout-3 .collage-item:first-child {
-    grid-row: 1 / 3;
-    min-height: 200px;
-  }
-
-  .photo-collage.layout-3 .collage-item:not(:first-child) {
-    min-height: 98px;
-  }
+  .photo-collage.layout-3 .collage-item:first-child { grid-row: 1 / 3; }
 
   .photo-collage.layout-4 {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-  }
-
-  .photo-collage.layout-4 .collage-item {
-    min-height: 110px;
+    aspect-ratio: 16 / 10;
   }
 
   .photo-collage.layout-5 {
     grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto auto;
+    grid-template-rows: 1.25fr 1fr;
+    aspect-ratio: 4 / 3;
   }
-
-  .photo-collage.layout-5 .collage-item:first-child {
-    grid-column: 1 / 3;
-    grid-row: 1 / 2;
-    min-height: 140px;
-  }
-
-  .photo-collage.layout-5 .collage-item:not(:first-child) {
-    min-height: 86px;
-  }
+  .photo-collage.layout-5 .collage-item:first-child { grid-column: 1 / 3; }
 
   .photo-count-overlay {
     position: absolute;
@@ -300,6 +177,7 @@
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
   }
 
@@ -315,11 +193,8 @@
     font-size: 1.1rem;
   }
 
-  .yt-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+  /* Videos */
+  .yt-list { display: flex; flex-direction: column; gap: 10px; }
 
   .yt-card {
     display: flex;
@@ -330,15 +205,15 @@
     padding: 8px;
     text-decoration: none;
     color: inherit;
+    min-width: 0;
   }
 
-  .yt-card:active {
-    opacity: 0.7;
-  }
+  .yt-card:active { opacity: 0.7; }
 
   .yt-thumb {
-    width: 96px;
-    height: 58px;
+    width: clamp(96px, 30%, 160px);
+    aspect-ratio: 16 / 9;
+    height: auto;
     border-radius: 12px;
     background: #d5e0f3;
     object-fit: cover;
@@ -346,12 +221,7 @@
     display: block;
   }
 
-  .yt-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-  }
+  .yt-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 
   .yt-badge {
     align-self: flex-start;
@@ -364,46 +234,23 @@
     letter-spacing: 0.04em;
   }
 
-  .yt-text {
-    font-size: 0.9rem;
-    color: var(--muted);
+  .yt-text { font-size: 0.9rem; color: var(--muted); }
+
+  @media (min-width: 900px) {
+    .notes-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
   }
 
-  .skeleton {
-    height: 150px;
-    border-radius: 28px;
-    background: linear-gradient(100deg, #f3f7ff 30%, #fafcff 50%, #f3f7ff 70%);
-    background-size: 200% 100%;
-    animation: shimmer 1.2s infinite linear;
-  }
-
-  @keyframes shimmer {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
-  }
-
-  .empty {
-    display: none;
-    text-align: center;
-    color: var(--muted);
-    padding: 70px 24px;
-  }
-
-  .empty h2 {
-    font-size: 1.2rem;
-    color: var(--navy);
-    margin-bottom: 6px;
-  }
-
-  .empty p {
-    font-size: 0.95rem;
+  @media (max-width: 360px) {
+    .note-card { border-radius: 22px; }
+    .file-row { gap: 12px; }
+    .file-icon { width: 48px; height: 48px; border-radius: 14px; }
   }
 </style>
 </head>
 <body>
 
 <header class="top-bar">
-  <a class="round-btn" id="backLink" href="index.html#subject" aria-label="Back">
+  <a class="round-btn" id="backLink" href="/#subject" aria-label="Back">
     <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
   </a>
   <h1 class="page-title" id="unitName">Unit</h1>
@@ -421,7 +268,8 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
 <script>
   (function () {
     "use strict";
@@ -445,10 +293,7 @@
     function cleanTitle(name) {
       var ext = extensionOf(name);
       if (!ext) return name;
-      if (name.endsWith("." + ext)) return name.slice(0, -(ext.length + 1));
-      var upper = ext.toUpperCase();
-      if (name.endsWith("." + upper)) return name.slice(0, -(upper.length + 1));
-      return name;
+      return name.slice(0, -(ext.length + 1));
     }
 
     function formatFileSize(bytes) {
@@ -504,17 +349,17 @@
     var backLink = document.getElementById("backLink");
 
     var unitId = qs("unitId") || "";
-    var unitName = qs("unitName") ? decodeURIComponent(qs("unitName")) : "Unit";
-    var subjectName = qs("subjectName") ? decodeURIComponent(qs("subjectName")) : "";
+    var unitName = qs("unitName") || "Unit";
+    var subjectName = qs("subjectName") || "";
     var subjectKey = qs("subjectKey") || sanitizeKey(subjectName.toLowerCase().replaceAll(" ", "_"));
 
     unitNameEl.textContent = unitName;
     document.title = "Durbar \u00B7 " + unitName;
 
-    backLink.href = "unit.html?subjectName=" + encodeURIComponent(subjectName) +
+    backLink.href = "/layout/unit.html?subjectName=" + encodeURIComponent(subjectName) +
                     "&subjectKey=" + encodeURIComponent(subjectKey);
 
-    function renderPhotoCollage(container, photos, noteId, position) {
+    function renderPhotoCollage(container, photos, noteId, noteTitle) {
       if (!photos || photos.length === 0) return;
 
       var count = photos.length;
@@ -525,16 +370,24 @@
       else if (count >= 5) layoutClass = "layout-5";
 
       var collage = el("div", "photo-collage " + layoutClass);
+      collage.setAttribute("role", "button");
+      collage.setAttribute("tabindex", "0");
+      collage.setAttribute("aria-label", "Open " + count + (count === 1 ? " photo" : " photos"));
 
       var photoUrls = photos.map(function (p) {
         return encodeURIComponent(p.url);
       }).join("||");
-      var photoPageUrl = "photo.html?photos=" + photoUrls +
+      var photoPageUrl = "/layout/photo.html?photos=" + photoUrls +
                          "&note=" + encodeURIComponent(noteId || "") +
-                         "&position=" + position;
+                         "&title=" + encodeURIComponent(noteTitle || "");
 
-      collage.addEventListener("click", function () {
-        window.location.href = photoPageUrl;
+      function open() { window.location.href = photoPageUrl; }
+      collage.addEventListener("click", open);
+      collage.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
       });
 
       var displayCount = Math.min(count, 5);
@@ -570,13 +423,22 @@
         var label = getFileLabel(rawName);
 
         var row = el("div", "file-row");
-        row.addEventListener("click", function (e) {
-          e.stopPropagation();
-          var viewerUrl = "pdf.html?url=" + encodeURIComponent(pdf.url) +
-                          "&name=" + encodeURIComponent(rawName) +
-                          "&size=" + encodeURIComponent(sizeText || "\u2014") +
-                          "&return=" + encodeURIComponent(window.location.pathname + window.location.search);
-          window.location.href = viewerUrl;
+        row.setAttribute("role", "button");
+        row.setAttribute("tabindex", "0");
+
+        function open(e) {
+          if (e) e.stopPropagation();
+          window.location.href = "/layout/pdf.html?url=" + encodeURIComponent(pdf.url) +
+                                 "&name=" + encodeURIComponent(rawName) +
+                                 "&size=" + encodeURIComponent(sizeText || "\u2014") +
+                                 "&return=" + encodeURIComponent(window.location.pathname + window.location.search);
+        }
+        row.addEventListener("click", open);
+        row.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            open();
+          }
         });
 
         var icon = el("div", "file-icon " + type);
@@ -617,7 +479,7 @@
         if (videoId) {
           var img = el("img", "yt-thumb");
           img.src = youtubeThumbUrl(videoId);
-          img.alt = "youtube thumbnail";
+          img.alt = "YouTube thumbnail";
           img.loading = "lazy";
           a.appendChild(img);
         }
@@ -653,7 +515,7 @@
 
       if (note.photos && note.photos.length > 0) {
         var photoGroup = mediaGroup("Photos");
-        renderPhotoCollage(photoGroup, note.photos, note.id, position);
+        renderPhotoCollage(photoGroup, note.photos, note.id, note.title);
         mediaSection.appendChild(photoGroup);
       }
 

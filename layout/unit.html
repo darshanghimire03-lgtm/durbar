@@ -5,100 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <title>Durbar</title>
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="/img-fix.js"></script>
+<link rel="stylesheet" href="/css/pages.css">
 <style>
-  :root {
-    --navy: #0c1f4a;
-    --muted: #8a96b0;
-    --tint: #e6eefc;
-    --tint-line: #d3dff5;
-    --card: #f3f7ff;
-    --icon-box: #e8f0fd;
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  html, body {
-    background: #ffffff;
-  }
-
-  body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    color: #111827;
-    max-width: 520px;
-    margin: 0 auto;
-    min-height: 100vh;
-    padding-bottom: calc(32px + env(safe-area-inset-bottom));
-  }
-
-  .top-bar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: calc(16px + env(safe-area-inset-top)) 16px 14px 16px;
-  }
-
-  .round-btn {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: var(--tint);
-    border: none;
-    color: var(--navy);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    text-decoration: none;
-  }
-
-  .round-btn svg {
-    width: 22px;
-    height: 22px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2.2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .round-btn svg.dots {
-    fill: currentColor;
-    stroke: none;
-  }
-
-  .page-title {
-    flex: 1;
-    min-width: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--navy);
-    letter-spacing: -0.01em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   .unit-list {
     list-style: none;
-    padding: 6px 20px 0 20px;
-    display: flex;
-    flex-direction: column;
+    padding: 6px var(--gutter) 0 var(--gutter);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
   }
 
@@ -106,17 +25,19 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    min-height: 84px;
     background: var(--card);
     border-radius: 30px;
-    padding: 16px 16px 16px 16px;
+    padding: 16px;
     text-decoration: none;
     color: inherit;
     transition: transform 0.15s ease, background 0.15s ease;
   }
 
-  .unit-card:active {
-    transform: scale(0.985);
-    background: #eaf1fd;
+  .unit-card:active { transform: scale(0.985); background: #eaf1fd; }
+
+  @media (hover: hover) {
+    .unit-card:hover { background: #eaf1fd; }
   }
 
   .unit-icon {
@@ -140,10 +61,7 @@
     stroke-linejoin: round;
   }
 
-  .unit-info {
-    flex: 1;
-    min-width: 0;
-  }
+  .unit-info { flex: 1; min-width: 0; display: block; }
 
   .unit-name {
     font-size: 1.1rem;
@@ -154,11 +72,7 @@
     text-overflow: ellipsis;
   }
 
-  .unit-count {
-    margin-top: 3px;
-    font-size: 0.95rem;
-    color: var(--muted);
-  }
+  .unit-count { margin-top: 3px; font-size: 0.95rem; color: var(--muted); }
 
   .chevron {
     width: 20px;
@@ -172,41 +86,25 @@
     margin-right: 4px;
   }
 
-  .skeleton {
-    height: 84px;
-    border-radius: 30px;
-    background: linear-gradient(100deg, #f3f7ff 30%, #fafcff 50%, #f3f7ff 70%);
-    background-size: 200% 100%;
-    animation: shimmer 1.2s infinite linear;
+  @media (min-width: 720px) {
+    .unit-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
   }
 
-  @keyframes shimmer {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
+  @media (min-width: 1024px) {
+    .unit-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
 
-  .empty {
-    display: none;
-    text-align: center;
-    color: var(--muted);
-    padding: 70px 24px;
-  }
-
-  .empty h2 {
-    font-size: 1.2rem;
-    color: var(--navy);
-    margin-bottom: 6px;
-  }
-
-  .empty p {
-    font-size: 0.95rem;
+  @media (max-width: 360px) {
+    .unit-card { gap: 12px; padding: 12px; border-radius: 24px; }
+    .unit-icon { width: 46px; height: 46px; }
+    .unit-name { font-size: 1rem; }
   }
 </style>
 </head>
 <body>
 
 <header class="top-bar">
-  <a class="round-btn" id="backLink" href="index.html#subject" aria-label="Back">
+  <a class="round-btn" id="backLink" href="/#subject" aria-label="Back">
     <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
   </a>
   <h1 class="page-title" id="subjectName">Subject</h1>
@@ -232,7 +130,8 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
 <script>
   (function () {
     var SVG_NS = "http://www.w3.org/2000/svg";
@@ -243,9 +142,8 @@
     var comingSoonEl = document.getElementById("comingSoon");
     var subjectNameEl = document.getElementById("subjectName");
 
-    var subjectName = qs("subjectName") ? decodeURIComponent(qs("subjectName")) : "Subject";
-    var subjectKeyFromLink = qs("subjectKey");
-    var subjectKey = subjectKeyFromLink || sanitizeKey(subjectName);
+    var subjectName = qs("subjectName") || "Subject";
+    var subjectKey = qs("subjectKey") || sanitizeKey(subjectName);
 
     subjectNameEl.textContent = subjectName;
     document.title = "Durbar \u00B7 " + subjectName;
@@ -261,10 +159,7 @@
     }
 
     function clearSkeletons() {
-      var skeletons = listEl.querySelectorAll(".skeleton");
-      skeletons.forEach(function (s) {
-        s.remove();
-      });
+      listEl.querySelectorAll(".skeleton").forEach(function (s) { s.remove(); });
     }
 
     function updateEmptyState(hasUnits) {
@@ -281,7 +176,7 @@
 
       var a = document.createElement("a");
       a.className = "unit-card";
-      a.href = "notes.html?unitId=" + encodeURIComponent(unit.id) +
+      a.href = "/layout/notes.html?unitId=" + encodeURIComponent(unit.id) +
                "&unitName=" + encodeURIComponent(unit.name) +
                "&subjectName=" + encodeURIComponent(subjectName) +
                "&subjectKey=" + encodeURIComponent(subjectKey);
@@ -292,7 +187,6 @@
 
       var info = document.createElement("span");
       info.className = "unit-info";
-      info.style.display = "block";
 
       var name = document.createElement("div");
       name.className = "unit-name";
