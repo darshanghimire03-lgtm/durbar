@@ -834,7 +834,7 @@
 
     document.getElementById("backBtn").addEventListener("click", function () {
       if (history.length > 1) history.back();
-      else location.href = "index.html";
+      else location.href = "/";
     });
 
     sendBtn.addEventListener("click", send);
@@ -846,6 +846,13 @@
       }
     });
 
+
+    // Logged-out visitors: go to login, then come back to this exact link
+    setTimeout(function () {
+      if (!auth.currentUser) {
+        location.replace("/auth.html?next=" + encodeURIComponent(location.pathname + location.search));
+      }
+    }, 2500);
     if (!postId) {
       composer.hidden = true;
       showState("Post not found.");

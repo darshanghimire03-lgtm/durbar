@@ -1,31 +1,64 @@
 {
   "cleanUrls": false,
   "rewrites": [
-{ "source": "/img/:path*", "destination": "https://durbar-api.vercel.app/img/:path*" },
-    { "source": "/vid/:path*", "destination": "https://durbar-api.vercel.app/vid/:path*" },
-    { "source": "/file/:path*", "destination": "https://durbar-api.vercel.app/file/:path*" },
     {
-      "source": "/post/:id",
+      "source": "/img/:path*",
+      "destination": "https://durbar-api.vercel.app/img/:path*"
+    },
+    {
+      "source": "/vid/:path*",
+      "destination": "https://durbar-api.vercel.app/vid/:path*"
+    },
+    {
+      "source": "/file/:path*",
+      "destination": "https://durbar-api.vercel.app/file/:path*"
+    },
+    {
+      "source": "/post/:id((?!index\\.html$)[^/]+)",
       "destination": "/api/share?type=post&id=:id"
     },
     {
-      "source": "/durbar/post/:id",
+      "source": "/post/:id((?!index\\.html$)[^/]+)/",
       "destination": "/api/share?type=post&id=:id"
     },
     {
-      "source": "/shorts/:id",
+      "source": "/durbar/post/:id((?!index\\.html$)[^/]+)",
+      "destination": "/api/share?type=post&id=:id"
+    },
+    {
+      "source": "/durbar/post/:id((?!index\\.html$)[^/]+)/",
+      "destination": "/api/share?type=post&id=:id"
+    },
+    {
+      "source": "/shorts/:id((?!index\\.html$)[^/]+)",
       "destination": "/api/share?type=shorts&id=:id"
     },
     {
-      "source": "/durbar/shorts/:id",
+      "source": "/shorts/:id((?!index\\.html$)[^/]+)/",
       "destination": "/api/share?type=shorts&id=:id"
     },
     {
-      "source": "/user/:id",
+      "source": "/durbar/shorts/:id((?!index\\.html$)[^/]+)",
+      "destination": "/api/share?type=shorts&id=:id"
+    },
+    {
+      "source": "/durbar/shorts/:id((?!index\\.html$)[^/]+)/",
+      "destination": "/api/share?type=shorts&id=:id"
+    },
+    {
+      "source": "/user/:id((?!index\\.html$)[^/]+)",
       "destination": "/api/share?type=user&id=:id"
     },
     {
-      "source": "/durbar/user/:id",
+      "source": "/user/:id((?!index\\.html$)[^/]+)/",
+      "destination": "/api/share?type=user&id=:id"
+    },
+    {
+      "source": "/durbar/user/:id((?!index\\.html$)[^/]+)",
+      "destination": "/api/share?type=user&id=:id"
+    },
+    {
+      "source": "/durbar/user/:id((?!index\\.html$)[^/]+)/",
       "destination": "/api/share?type=user&id=:id"
     }
   ],

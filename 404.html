@@ -150,9 +150,11 @@
 
 <script>
 (function () {
+  function dec(v) { try { return decodeURIComponent(v); } catch (e) { return v; } }
+  function clean(v) { return /^[A-Za-z0-9_-]{1,128}$/.test(v) ? v : ""; }
+
   var path = window.location.pathname || "";
-  var search = window.location.search || "";
-  var query = new URLSearchParams(search);
+  var query = new URLSearchParams(window.location.search || "");
 
   var target = null;
   var label = "Opening…";
@@ -161,33 +163,36 @@
   var shortMatch = path.match(/^(?:\/durbar)?\/shorts\/([^\/?#]+)/i);
   var userMatch = path.match(/^(?:\/durbar)?\/user\/([^\/?#]+)/i);
 
-  if (postMatch && !/^index\.html?$/i.test(postMatch[1])) {
-    target = "/comment.html?postId=" + encodeURIComponent(decodeURIComponent(postMatch[1]));
+  var postId = postMatch ? clean(dec(postMatch[1])) : "";
+  var shortId = shortMatch ? clean(dec(shortMatch[1])) : "";
+  var userId = userMatch ? clean(dec(userMatch[1])) : "";
+
+  if (postId && !/^index\.html?$/i.test(postId)) {
+    target = "/comment.html?postId=" + encodeURIComponent(postId);
     label = "Opening post…";
-  } else if (shortMatch && !/^index\.html?$/i.test(shortMatch[1])) {
-    target = "/shorts/?id=" + encodeURIComponent(decodeURIComponent(shortMatch[1]));
+  } else if (shortId && !/^index\.html?$/i.test(shortId)) {
+    target = "/shorts/?id=" + encodeURIComponent(shortId);
     label = "Opening short…";
-  } else if (userMatch) {
-    target = "/profile/?uid=" + encodeURIComponent(decodeURIComponent(userMatch[1]));
+  } else if (userId) {
+    target = "/profile/?uid=" + encodeURIComponent(userId);
     label = "Opening profile…";
-  } else if (/\/shorts\/?$/i.test(path) && query.get("id")) {
+  } else if (/\/shorts\/?$/i.test(path) && clean(query.get("id") || "")) {
     target = "/shorts/?id=" + encodeURIComponent(query.get("id"));
     label = "Opening short…";
-  } else if (/\/post\/?$/i.test(path) && query.get("id")) {
+  } else if (/\/post\/?$/i.test(path) && clean(query.get("id") || "")) {
     target = "/comment.html?postId=" + encodeURIComponent(query.get("id"));
     label = "Opening post…";
   }
+
+  // Never redirect to the page we are already on (prevents loops)
+  if (target && target.split("?")[0] === path) target = null;
 
   if (target) {
     document.getElementById("redirecting").classList.add("show");
     document.getElementById("redirectingText").textContent = label;
     document.getElementById("manualLink").href = target;
-
-    try {
-      window.location.replace(target);
-    } catch (e) {
-      window.location.href = target;
-    }
+    try { window.location.replace(target); }
+    catch (e) { window.location.href = target; }
   } else {
     document.getElementById("genericNotFound").classList.add("show");
   }

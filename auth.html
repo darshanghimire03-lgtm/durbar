@@ -318,7 +318,8 @@
     var eyeIcon = document.getElementById("eyeIcon");
 
     var next = new URLSearchParams(location.search).get("next") || "index.html";
-    if (!/^[A-Za-z0-9_\-]+\.html([?#].*)?$/.test(next)) {
+    // allow: page.html?x, /page.html?x, /folder/?x  (same-site only, no "//" or schemes)
+    if (!/^\/?[A-Za-z0-9_\-]+(\.html|\/)([?#][^\s]*)?$/.test(next) || next.indexOf("//") !== -1) {
       next = "index.html";
     }
 

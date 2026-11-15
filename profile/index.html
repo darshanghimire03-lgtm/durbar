@@ -843,6 +843,14 @@
     auth.onAuthStateChanged(function (user) {
       if (user && !currentUser) start(user);
     });
+
+    // Logged-out visitors: go to login, then come back to this exact link
+    setTimeout(function () {
+      if (!auth.currentUser) {
+        location.replace("/auth.html?next=" + encodeURIComponent(location.pathname + location.search));
+      }
+    }, 2500);
+
   })();
 </script>
 

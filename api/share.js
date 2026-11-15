@@ -192,8 +192,10 @@ function metaTags(opts) {
 }
 
 function wrapPage(title, meta, bodyHtml, redirectTo) {
+  const safeJs = function (v) { return JSON.stringify(v).replace(/</g, "\\u003c"); };
   const script = redirectTo
-    ? "<script>try{window.location.replace(" + JSON.stringify(redirectTo) + ")}catch(e){window.location.href=" + JSON.stringify(redirectTo) + "}</script>"
+    ? "<script>try{window.location.replace(" + safeJs(redirectTo) + ")}catch(e){window.location.href=" + safeJs(redirectTo) + "}</script>" +
+      "<noscript><meta http-equiv=\"refresh\" content=\"0;url=" + esc(redirectTo) + "\"></noscript>"
     : "";
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
@@ -215,7 +217,7 @@ function possessive(name) {
 
 function renderPost(id, post) {
   const pageUrl = SITE + "/post/" + id;
-  const target = SITE + "/comment.html?postId=" + encodeURIComponent(id);
+  const target = id === "invalid" ? SITE + "/" : SITE + "/comment.html?postId=" + encodeURIComponent(id);
   const name = post && post.authorName ? post.authorName : "Durbar User";
   const role = post && post.authorRole ? post.authorRole : "";
   const body = post ? shorten(post.text, 300) : "";
@@ -258,7 +260,7 @@ function renderPost(id, post) {
 
 function renderShort(id, short) {
   const pageUrl = SITE + "/shorts/" + id;
-  const target = SITE + "/shorts/?id=" + encodeURIComponent(id);
+  const target = id === "invalid" ? SITE + "/" : SITE + "/shorts/?id=" + encodeURIComponent(id);
   const shortTitle = short && short.title ? shorten(short.title, 90) : "";
   const subject = short && short.relatedSubject ? short.relatedSubject : "";
   const thumb = short ? videoThumbnail(short.videoUrl) : "";
@@ -331,7 +333,9 @@ function renderUser(id, user) {
 
 module.exports = async function handler(req, res) {
   const type = String((req.query && req.query.type) || "");
-  const id = String((req.query && req.query.id) || "");
+  let id = String((req.query && req.query.id) || "");
+  try { id = decodeURIComponent(id); } catch (e) {}
+  id = id.trim();
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
