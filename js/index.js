@@ -29,22 +29,27 @@
     });
   }
 
-  function loadScriptsInOrder(list) {
-    return list.reduce(function (chain, src) {
-      return chain.then(function () {
-        return loadScript(src);
-      });
-    }, Promise.resolve());
-  }
-
-  function showBootError() {
+  function showBootError(err) {
     var feed = document.getElementById("feed");
     if (!feed) return;
+    var detail = err && err.message ? err.message : "";
+    if (typeof auth === "undefined" || typeof db === "undefined") {
+      detail = "Firebase is not configured. Check the Vercel environment variables.";
+    }
+    console.error("Boot failed", err);
     feed.textContent = "";
     var box = document.createElement("div");
     box.className = "state";
     var message = document.createElement("div");
     message.textContent = "Couldn't load the page. Check your connection.";
+    box.appendChild(message);
+    if (detail) {
+      var info = document.createElement("div");
+      info.textContent = detail;
+      info.style.fontSize = "0.8rem";
+      info.style.marginTop = "8px";
+      box.appendChild(info);
+    }
     var retry = document.createElement("button");
     retry.className = "retry-btn";
     retry.type = "button";
@@ -52,15 +57,28 @@
     retry.addEventListener("click", function () {
       location.reload();
     });
-    box.appendChild(message);
     box.appendChild(retry);
     feed.appendChild(box);
+  }
+
+  function loadTabScripts() {
+    return Promise.all(TAB_SCRIPTS.map(function (src) {
+      return loadScript(src).then(function () {
+        return null;
+      }, function (err) {
+        return err;
+      });
+    })).then(function (results) {
+      var failed = results.filter(Boolean);
+      if (failed.length === TAB_SCRIPTS.length) throw failed[0];
+      if (!window.Tabs || !window.Tabs.home) throw new Error("Missing " + TAB_SCRIPTS[0]);
+    });
   }
 
   Promise.all([fetchText(HEADER_URL), fetchText(NAV_URL)]).then(function (parts) {
     mount("headerSlot", parts[0]);
     mount("navSlot", parts[1]);
-    return loadScriptsInOrder(TAB_SCRIPTS);
+    return loadTabScripts();
   }).then(initApp).catch(showBootError);
 
   function initApp() {
@@ -91,14 +109,27 @@
       });
     });
 
-    var nextUrl = window.AuthSheet.nextUrl;
+    var sheetApi = window.AuthSheet || {
+      nextUrl: "",
+      isBusy: function () { return false; },
+      onComplete: function () {}
+    };
+    var nextUrl = sheetApi.nextUrl;
+
+    function safeStart(tab, user) {
+      try {
+        if (tabs[tab] && tabs[tab].start) tabs[tab].start(user);
+      } catch (err) {
+        console.error(tab + " failed to start", err);
+      }
+    }
 
     function startApp(user) {
       if (started) return;
       started = true;
-      tabs.home.start(user);
-      tabs.subject.start();
-      tabs.shorts.start();
+      safeStart("home", user);
+      safeStart("subject", user);
+      safeStart("shorts", user);
       if (location.hash === "#shorts" || new URLSearchParams(location.search).get("short")) {
         select("shorts");
       } else if (location.hash === "#subject") {
@@ -106,14 +137,14 @@
       }
     }
 
-    window.AuthSheet.onComplete(startApp);
+    sheetApi.onComplete(startApp);
 
     auth.onAuthStateChanged(function (user) {
       if (!user) {
         if (started) location.reload();
         return;
       }
-      if (window.AuthSheet.isBusy()) return;
+      if (sheetApi.isBusy()) return;
       if (nextUrl) {
         location.replace(nextUrl);
         return;
