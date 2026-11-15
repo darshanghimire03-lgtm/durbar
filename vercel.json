@@ -1,6 +1,7 @@
 {
   "cleanUrls": false,
   "rewrites": [
+    { "source": "/firebase-config.js", "destination": "/api/env?bundle=1" },
     { "source": "/post/:id", "destination": "/api/share?type=post&id=:id" },
     { "source": "/post/:id/", "destination": "/api/share?type=post&id=:id" },
     { "source": "/durbar/post/:id", "destination": "/api/share?type=post&id=:id" },
