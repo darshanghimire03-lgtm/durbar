@@ -742,29 +742,43 @@
       });
     }
 
-    function uploadToCloudinary(blob) {
-      var form = new FormData();
-      form.append("file", blob);
-      form.append("upload_preset", CLOUDINARY.uploadPreset);
-      return fetch("https://api.cloudinary.com/v1_1/" + encodeURIComponent(CLOUDINARY.cloudName) + "/image/upload", {
-        method: "POST",
-        body: form
+    function blobToBase64(blob) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          var result = String(reader.result || "");
+          resolve(result.split(",")[1] || "");
+        };
+        reader.onerror = function () {
+          reject(new Error("Could not read image"));
+        };
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function uploadToImgbb(blob) {
+      return Promise.all([blobToBase64(blob), currentUser.getIdToken()]).then(function (parts) {
+        if (!parts[0]) throw new Error("Empty image");
+        return fetch("/api/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + parts[1]
+          },
+          body: JSON.stringify({ image: parts[0] })
+        });
       }).then(function (res) {
-        return res.json().then(function (data) {
-          if (!res.ok || !data.secure_url) {
-            throw new Error((data && data.error && data.error.message) || "Upload failed");
+        return res.json().catch(function () { return null; }).then(function (data) {
+          if (!res.ok || !data || !data.url) {
+            throw new Error((data && data.error) || "Upload failed");
           }
-          return data.secure_url;
+          return data.url;
         });
       });
     }
 
     changeBtn.addEventListener("click", function () {
       if (!currentUser) return;
-      if (!CLOUDINARY.cloudName || !CLOUDINARY.uploadPreset) {
-        showToast("Set CLOUDINARY cloudName and uploadPreset in firebase-config.js");
-        return;
-      }
       fileInput.click();
     });
 
@@ -773,10 +787,15 @@
       fileInput.value = "";
       if (!file || !currentUser) return;
 
+      if (!/^image\//.test(file.type)) {
+        showToast("Please choose an image file");
+        return;
+      }
+
       changeBtn.disabled = true;
       changeLabel.textContent = "Uploading...";
 
-      resizeImage(file, 640).then(uploadToCloudinary).then(function (url) {
+      resizeImage(file, 640).then(uploadToImgbb).then(function (url) {
         return db.ref("users").child(currentUser.uid).update({ profileImageUrl: url }).then(function () {
           avatarEl.src = url;
           showToast("Profile photo updated");
@@ -845,7 +864,6 @@
       if (user && !currentUser) start(user);
     });
 
-    // Logged-out visitors: go to login, then come back to this exact link
     setTimeout(function () {
       if (!auth.currentUser) {
         location.replace("/auth.html?next=" + encodeURIComponent(location.pathname + location.search));
