@@ -2,17 +2,14 @@
   <div class="as-sheet" role="dialog" aria-modal="true" aria-labelledby="asTitle" aria-describedby="asDesc">
     <div class="as-handle" aria-hidden="true"></div>
 
-    <div class="as-brand">
-      <img src="/favicon.png" alt="" width="64" height="64">
-    </div>
-
     <div class="as-head-text">
-      <h2 id="asTitle">Welcome to Durbar</h2>
-      <p id="asDesc">Sign in with your Google account to continue.</p>
+      <h2 id="asTitle">Welcome back</h2>
+      <p id="asDesc">Sign in to continue to Durbar</p>
     </div>
 
     <div class="as-form">
       <div class="as-error" id="asError" role="alert" aria-live="assertive"></div>
+      <div class="as-info" id="asInfo" role="status" aria-live="polite"></div>
 
       <button type="button" class="as-google" id="asGoogleBtn">
         <svg viewBox="0 0 48 48" aria-hidden="true">
@@ -24,6 +21,40 @@
         <span class="as-spinner" aria-hidden="true"></span>
         <span id="asGoogleLabel">Continue with Google</span>
       </button>
+
+      <div class="as-divider"><span>or</span></div>
+
+      <form class="as-email-form" id="asEmailForm" novalidate>
+        <label class="as-field" id="asNameField" hidden>
+          <span class="as-label">Full name</span>
+          <input type="text" id="asName" autocomplete="name" placeholder="Your name">
+        </label>
+
+        <label class="as-field">
+          <span class="as-label">Email</span>
+          <input type="email" id="asEmail" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+        </label>
+
+        <label class="as-field">
+          <span class="as-label">Password</span>
+          <span class="as-pass-wrap">
+            <input type="password" id="asPassword" autocomplete="current-password" placeholder="At least 6 characters" required>
+            <button type="button" class="as-eye" id="asEye" aria-label="Show password">Show</button>
+          </span>
+        </label>
+
+        <button type="button" class="as-link as-forgot" id="asForgot">Forgot password?</button>
+
+        <button type="submit" class="as-submit" id="asSubmitBtn">
+          <span class="as-spinner as-spinner-light" aria-hidden="true"></span>
+          <span id="asSubmitLabel">Sign in</span>
+        </button>
+      </form>
+
+      <p class="as-switch">
+        <span id="asSwitchText">New to Durbar?</span>
+        <button type="button" class="as-link" id="asSwitchBtn">Create account</button>
+      </p>
 
       <p class="as-legal">
         By continuing you agree to our

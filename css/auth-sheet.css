@@ -6,7 +6,7 @@
   overscroll-behavior: contain;
   animation: asFade 0.25s ease;
 }
-.as-overlay[hidden] { display: none !important; }
+.as-overlay[hidden], .as-sheet [hidden] { display: none !important; }
 
 .as-sheet {
   width: 100%; max-width: 520px; max-height: 94vh; overflow-y: auto;
@@ -14,7 +14,7 @@
   border-radius: 28px 28px 0 0;
   padding: 12px 26px calc(22px + env(safe-area-inset-bottom)) 26px;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: #111827; text-align: center;
+  color: #111827;
   box-shadow: 0 -12px 40px rgba(12, 31, 74, 0.25);
   animation: asUp 0.3s cubic-bezier(.2,.8,.2,1);
 }
@@ -23,57 +23,99 @@
 
 .as-handle { width: 42px; height: 4px; margin: 0 auto 20px; border-radius: 2px; background: #d6e2f5; }
 
-.as-brand { display: flex; justify-content: center; margin-bottom: 16px; }
-.as-brand img {
-  width: 64px; height: 64px; border-radius: 18px; object-fit: cover;
-  background: #fff; border: 1.5px solid #d3dff5;
-  box-shadow: 0 8px 20px rgba(61, 123, 228, 0.18);
-}
+.as-head-text h2 { font-size: 1.9rem; font-weight: 700; color: #0c1f4a; letter-spacing: -0.02em; line-height: 1.1; }
+.as-head-text p { margin-top: 6px; font-size: 0.98rem; color: #6b7a99; }
 
-.as-head-text h2 { font-size: 1.75rem; font-weight: 700; color: #0c1f4a; letter-spacing: -0.02em; line-height: 1.15; }
-.as-head-text p { margin-top: 8px; font-size: 0.98rem; color: #6b7a99; line-height: 1.45; }
+.as-form { margin-top: 24px; display: flex; flex-direction: column; gap: 14px; }
 
-.as-form { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
-
-.as-error {
+.as-error, .as-info {
   display: none; padding: 10px 14px; border-radius: 12px;
-  background: #fdecec; color: #c62828;
   font-size: 0.9rem; font-weight: 500; line-height: 1.4;
 }
-.as-error.visible { display: block; }
+.as-error { background: #fdecec; color: #c62828; }
+.as-info { background: #e6f6ec; color: #1b7a3d; }
+.as-error.visible, .as-info.visible { display: block; }
 
+/* Google button */
 .as-google {
-  height: 56px; border: 2px solid #d6e2f5; border-radius: 999px;
+  height: 54px; border: 2px solid #d6e2f5; border-radius: 999px;
   background: #ffffff; color: #0c1f4a;
-  font-family: inherit; font-size: 1.05rem; font-weight: 600;
+  font-family: inherit; font-size: 1.02rem; font-weight: 600;
   display: flex; align-items: center; justify-content: center; gap: 12px;
   cursor: pointer; width: 100%;
   box-shadow: 0 6px 16px rgba(61, 123, 228, 0.12);
   transition: transform 0.1s ease, opacity 0.2s ease, border-color 0.2s ease;
 }
 .as-google:hover { border-color: #9fbdf0; }
-.as-google:focus-visible { outline: 3px solid rgba(61, 123, 228, 0.45); outline-offset: 2px; }
 .as-google:active { transform: scale(0.985); border-color: #3d7be4; }
-.as-google:disabled { opacity: 0.7; cursor: default; }
 .as-google svg { width: 22px; height: 22px; flex-shrink: 0; }
 
+/* Divider */
+.as-divider { display: flex; align-items: center; gap: 12px; color: #8a96b0; font-size: 0.85rem; }
+.as-divider::before, .as-divider::after { content: ""; flex: 1; height: 1px; background: #d6e2f5; }
+
+/* Email form */
+.as-email-form { display: flex; flex-direction: column; gap: 12px; }
+.as-field { display: flex; flex-direction: column; gap: 6px; }
+.as-label { font-size: 0.82rem; font-weight: 600; color: #0c1f4a; }
+.as-field input {
+  width: 100%; height: 50px; padding: 0 16px;
+  border: 2px solid #d6e2f5; border-radius: 14px; background: #fff;
+  font-family: inherit; font-size: 1rem; color: #111827; outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.as-field input::placeholder { color: #a7b2c9; }
+.as-field input:focus { border-color: #3d7be4; box-shadow: 0 0 0 4px rgba(61, 123, 228, 0.15); }
+.as-pass-wrap { position: relative; display: block; }
+.as-pass-wrap input { padding-right: 70px; }
+.as-eye {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  height: 34px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent;
+  font-family: inherit; font-size: 0.85rem; font-weight: 600; color: #3d7be4; cursor: pointer;
+}
+
+.as-link {
+  border: 0; background: none; padding: 0; font-family: inherit;
+  font-size: 0.9rem; font-weight: 600; color: #3d7be4; cursor: pointer;
+}
+.as-link:hover { text-decoration: underline; }
+.as-forgot { align-self: flex-end; margin-top: -2px; }
+
+.as-submit {
+  height: 54px; border: 0; border-radius: 999px; width: 100%;
+  background: #3d7be4; color: #fff;
+  font-family: inherit; font-size: 1.05rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  cursor: pointer; box-shadow: 0 8px 18px rgba(61, 123, 228, 0.3);
+  transition: transform 0.1s ease, opacity 0.2s ease;
+}
+.as-submit:active { transform: scale(0.985); }
+
+.as-google:disabled, .as-submit:disabled { opacity: 0.7; cursor: default; }
+.as-google:focus-visible, .as-submit:focus-visible, .as-link:focus-visible, .as-eye:focus-visible {
+  outline: 3px solid rgba(61, 123, 228, 0.45); outline-offset: 2px;
+}
+
+/* Spinners */
 .as-spinner {
   width: 20px; height: 20px; border-radius: 50%;
   border: 3px solid #d6e2f5; border-top-color: #3d7be4;
   animation: asSpin 0.8s linear infinite; display: none;
 }
-.as-google.loading .as-spinner { display: block; }
+.as-spinner-light { border-color: rgba(255, 255, 255, 0.4); border-top-color: #fff; }
+.loading .as-spinner { display: block; }
 .as-google.loading svg { display: none; }
 @keyframes asSpin { to { transform: rotate(360deg); } }
 
-.as-legal { font-size: 0.8rem; color: #8a96b0; line-height: 1.5; }
+.as-switch { text-align: center; font-size: 0.92rem; color: #6b7a99; }
+.as-switch .as-link { margin-left: 4px; }
+.as-legal { text-align: center; font-size: 0.78rem; color: #8a96b0; line-height: 1.5; }
 .as-legal a { color: #3d7be4; font-weight: 600; text-decoration: none; }
 .as-legal a:hover { text-decoration: underline; }
 
-.as-foot { margin-top: 22px; text-align: center; font-size: 0.9rem; color: #8a96b0; }
+.as-foot { margin-top: 18px; text-align: center; font-size: 0.9rem; color: #8a96b0; }
 .as-foot strong { color: #3d7be4; font-weight: 700; }
 
-/* Larger screens: centered card instead of bottom sheet */
 @media (min-width: 600px) {
   .as-overlay { align-items: center; }
   .as-sheet { border-radius: 28px; padding: 32px 36px 24px; max-width: 440px; }
