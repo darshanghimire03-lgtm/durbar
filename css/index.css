@@ -1,4 +1,4 @@
-:root { --bg: #ffffff; --card: #eaf1fd; --navy: #0c1f4a; --blue: #1f4aa8; --muted: #6b7a99; --line: #cfd9ec; --like: #e53935; --tint: #e6eefc; --tint-line: #d3dff5; --subject-card: #f3f7ff; --subject-icon: #e8f0fd; --side-w: 104px; }
+:root { --bg: #ffffff; --card: #eaf1fd; --navy: #0c1f4a; --blue: #1f4aa8; --muted: #6b7a99; --line: #cfd9ec; --like: #e53935; --tint: #e6eefc; --tint-line: #d3dff5; --subject-card: #f3f7ff; --subject-icon: #e8f0fd; --side-w: 240px; }
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 [hidden] { display: none !important; }
 html, body { background: var(--bg); }
@@ -150,8 +150,10 @@ img, video { max-width: 100%; }
   .top-bar, .page-head { padding-left: 32px; padding-right: 32px; }
   .feed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 20px; padding: 8px 32px 24px 32px; }
   .subject-list { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 0 32px 24px 32px; }
-  .bottom-nav { left: 0; top: 0; bottom: 0; transform: none; width: var(--side-w); max-width: none; flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 8px; padding: calc(24px + env(safe-area-inset-top)) 10px 24px 10px; box-shadow: 1px 0 0 rgba(12, 31, 74, 0.06), 6px 0 18px rgba(12, 31, 74, 0.05); }
-  .nav-item { flex: 0 0 auto; padding: 14px 0; border-radius: 18px; font-size: 0.85rem; transition: background 0.15s ease; }
+  .bottom-nav { left: 0; top: 0; bottom: 0; transform: none; width: var(--side-w); max-width: none; flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 6px; padding: calc(28px + env(safe-area-inset-top)) 16px 24px 16px; box-shadow: 1px 0 0 rgba(12, 31, 74, 0.06), 6px 0 18px rgba(12, 31, 74, 0.05); }
+  .nav-item { flex: 0 0 auto; flex-direction: row; justify-content: flex-start; align-items: center; gap: 16px; padding: 14px 18px; border-radius: 18px; font-size: 1.05rem; text-align: left; transition: background 0.15s ease; }
+  .nav-item svg { flex-shrink: 0; }
+  .nav-item span { white-space: nowrap; }
   .nav-item:hover { background: var(--tint); }
   .nav-item.active { background: var(--tint); }
   #view-shorts.active { left: var(--side-w); right: 0; bottom: 0; width: auto; max-width: none; transform: none; }
