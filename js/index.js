@@ -1,7 +1,7 @@
 (function () {
   var HEADER_URL = "layout/header.html";
   var NAV_URL = "layout/navigation.html";
-  var TAB_SCRIPTS = ["js/home.js", "js/shorts.js", "js/subject.js"];
+  var TAB_SCRIPTS = ["js/post.js", "js/shorts.js", "js/subject.js"];
 
   function fetchText(url) {
     return fetch(url).then(function (res) {
