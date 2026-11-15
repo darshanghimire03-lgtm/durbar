@@ -321,11 +321,13 @@
       clearTimeout(timer);
       allPosts = results[1];
       renderPosts();
-    }).catch(function () {
+    }).catch(function (err) {
       if (done) return;
       done = true;
       clearTimeout(timer);
-      showState("Couldn't load posts. You may not have permission to view them.", true);
+      var code = err && (err.code || err.message) ? " (" + (err.code || err.message) + ")" : "";
+      console.error("Posts failed to load", err);
+      showState("Couldn't load posts" + code + ".", true);
     });
   }
 
