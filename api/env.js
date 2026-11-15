@@ -67,9 +67,14 @@ module.exports = function handler(req, res) {
   const env = readEnv();
   res.setHeader("Content-Type", "application/javascript; charset=utf-8");
 
-  if (!env.apiKey || !env.databaseURL || !env.projectId) {
+  const missing = [];
+  if (!env.apiKey) missing.push("FIREBASE_API_KEY");
+  if (!env.databaseURL) missing.push("FIREBASE_DATABASE_URL");
+  if (!env.projectId) missing.push("FIREBASE_PROJECT_ID");
+
+  if (missing.length) {
     res.setHeader("Cache-Control", "no-store");
-    res.status(500).send('console.error("Missing Firebase environment variables");');
+    res.status(500).send("console.error(" + JSON.stringify("Missing Firebase environment variables: " + missing.join(", ")) + ");");
     return;
   }
 
