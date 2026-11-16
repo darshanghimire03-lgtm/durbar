@@ -1,4 +1,4 @@
-:root { --navy: #0c1f4a; --blue: #1f3a8a; --role-blue: #1f4aa8; --muted: #98a2b8; --tint: #eaf1fd; --tint-line: #d3dff5; --card: #f3f7ff; --like: #e53935; }
+:root { --navy: #0c1f4a; --blue: #1f3a8a; --role-blue: #1f4aa8; --muted: #98a2b8; --tint: #eaf1fd; --tint-line: #d3dff5; --card: #f3f7ff; --like: #e53935; --page-w: 1040px; }
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { background: #ffffff; }
 body { font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #111827; max-width: 520px; margin: 0 auto; min-height: 100vh; padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
@@ -112,7 +112,10 @@ body { overflow-x: hidden; min-height: 100vh; min-height: 100dvh; }
   .avatar { width: 104px; height: 104px; }
 }
 @media (min-width: 1024px) {
-  body { max-width: 1040px; }
   .short-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .post-list, .feed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 20px; }
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .short-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .post-list, .feed { grid-template-columns: minmax(0, 1fr); }
 }
