@@ -1,8 +1,8 @@
 (function () {
   var POST_LIMIT = 30;
   var LOAD_TIMEOUT_MS = 12000;
-  var POST_TEMPLATE_URL = "layout/item_post.html";
-  var PROFILE_URL = "profile/index.html";
+  var POST_TEMPLATE_URL = "/html/item_post.html";
+  var PROFILE_URL = "/html/profile.html";
 
   var feed = document.getElementById("feed");
   var topBar = document.getElementById("topBar");
@@ -192,7 +192,7 @@
     });
 
     card.querySelector(".action.comment").addEventListener("click", function () {
-location.href = "/layout/comment.html?postId=" + encodeURIComponent(post.id);
+      location.href = "/html/comment.html?postId=" + encodeURIComponent(post.id);
     });
 
     return card;
