@@ -680,7 +680,7 @@
 
   setTimeout(function () {
     if (!auth.currentUser) {
-      location.replace("/auth.html?next=" + encodeURIComponent(location.pathname + location.search));
+      location.replace("/?next=" + encodeURIComponent(location.pathname + location.search));
     }
   }, 2500);
 
