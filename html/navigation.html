@@ -12,8 +12,12 @@
     <span>Subject</span>
   </button>
   <button class="nav-item" type="button" data-view="mock">
-    <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>
+    <svg class="fill-on-active" viewBox="0 0 24 24"><path d="M7 3.5h8l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7.5 3.5zM15 3.5V8h4M9 12.5h6M9 16h4"/></svg>
     <span>Mock</span>
+  </button>
+  <button class="nav-item" type="button" data-view="calender">
+    <svg class="fill-on-active" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+    <span>Calendar</span>
   </button>
   <span class="nav-sep"></span>
   <a class="nav-item pc-only" href="/html/profile.html">
@@ -27,8 +31,10 @@
 </nav>
 <style>
   .nav-sep, .nav-item.pc-only { display: none; }
+  .nav-item span { font-size: 0.85rem; }
   @media (min-width: 1024px) {
     .nav-sep { display: block; flex: 0 0 auto; height: 1.5px; margin: 8px 12px; background: #e6eefc; }
     .nav-item.pc-only { display: flex; }
+    .nav-item span { font-size: inherit; }
   }
 </style>

@@ -1,7 +1,9 @@
 (function () {
   var HEADER_URL = "layout/header.html";
   var NAV_URL = "layout/navigation.html";
-  var TAB_SCRIPTS = ["js/post.js", "js/shorts.js", "js/subject.js", "js/mock.js"];
+  var MOCKS_URL = "layout/mocks.html";
+  var CALENDER_URL = "layout/calender.html";
+  var TAB_SCRIPTS = ["js/post.js", "js/shorts.js", "js/subject.js", "js/mocks.js", "js/calender.js"];
 
   function fetchText(url) {
     return fetch(url).then(function (res) {
@@ -10,8 +12,15 @@
     });
   }
 
+  function fetchOptional(url) {
+    return fetchText(url).catch(function () {
+      return "";
+    });
+  }
+
   function mount(slotId, html) {
     var slot = document.getElementById(slotId);
+    if (!slot) return;
     var holder = document.createElement("template");
     holder.innerHTML = html.trim();
     slot.replaceWith(holder.content);
@@ -75,9 +84,16 @@
     });
   }
 
-  Promise.all([fetchText(HEADER_URL), fetchText(NAV_URL)]).then(function (parts) {
+  Promise.all([
+    fetchText(HEADER_URL),
+    fetchText(NAV_URL),
+    fetchOptional(MOCKS_URL),
+    fetchOptional(CALENDER_URL)
+  ]).then(function (parts) {
     mount("headerSlot", parts[0]);
     mount("navSlot", parts[1]);
+    mount("mockSlot", parts[2]);
+    mount("calenderSlot", parts[3]);
     return loadTabScripts();
   }).then(initApp).catch(showBootError);
 
@@ -87,6 +103,7 @@
       home: document.getElementById("view-home"),
       subject: document.getElementById("view-subject"),
       mock: document.getElementById("view-mock"),
+      calender: document.getElementById("view-calender"),
       shorts: document.getElementById("view-shorts")
     };
     var tabButtons = document.querySelectorAll(".nav-item[data-view]");
@@ -131,6 +148,7 @@
       safeStart("home", user);
       safeStart("subject", user);
       safeStart("mock", user);
+      safeStart("calender", user);
       safeStart("shorts", user);
       if (location.hash === "#shorts" || new URLSearchParams(location.search).get("short")) {
         select("shorts");
@@ -138,6 +156,8 @@
         select("subject");
       } else if (location.hash === "#mock") {
         select("mock");
+      } else if (location.hash === "#calender") {
+        select("calender");
       }
     }
 

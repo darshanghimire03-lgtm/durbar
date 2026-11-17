@@ -1,8 +1,4 @@
-.mk-root { padding: 0 20px 24px 20px; }
-.mk-seg { display: flex; gap: 6px; padding: 5px; background: var(--tint); border: 1.5px solid var(--tint-line); border-radius: 999px; }
-.mk-seg-btn { flex: 1; border: none; background: transparent; padding: 11px 8px; border-radius: 999px; font-family: inherit; font-size: 1rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
-.mk-seg-btn.active { background: #ffffff; color: var(--blue); font-weight: 700; box-shadow: 0 1px 4px rgba(12, 31, 74, 0.1); }
-.mk-body { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+.mk-root { padding: 0 20px 24px 20px; display: flex; flex-direction: column; gap: 14px; }
 .mk-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; background: var(--blue); color: #ffffff; font-family: inherit; font-size: 1rem; font-weight: 700; padding: 13px 22px; border-radius: 999px; cursor: pointer; }
 .mk-btn.wide { width: 100%; }
 .mk-btn.ghost { background: var(--tint); color: var(--blue); }
@@ -37,6 +33,6 @@
   .mk-root { padding: 0 24px 32px 24px; }
 }
 @media (min-width: 1024px) {
-  #view-mock { max-width: 1400px; margin: 0 auto; }
+  #view-mock, #view-calender { max-width: 1400px; margin: 0 auto; }
   .mk-root { padding: 0 40px 32px 40px; max-width: 760px; }
 }
