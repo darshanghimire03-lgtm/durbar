@@ -1,7 +1,7 @@
 (function () {
   var HEADER_URL = "layout/header.html";
   var NAV_URL = "layout/navigation.html";
-  var TAB_SCRIPTS = ["js/post.js", "js/shorts.js", "js/subject.js"];
+  var TAB_SCRIPTS = ["js/post.js", "js/shorts.js", "js/subject.js", "js/mock.js"];
 
   function fetchText(url) {
     return fetch(url).then(function (res) {
@@ -86,6 +86,7 @@
     var views = {
       home: document.getElementById("view-home"),
       subject: document.getElementById("view-subject"),
+      mock: document.getElementById("view-mock"),
       shorts: document.getElementById("view-shorts")
     };
     var tabButtons = document.querySelectorAll(".nav-item[data-view]");
@@ -129,11 +130,14 @@
       started = true;
       safeStart("home", user);
       safeStart("subject", user);
+      safeStart("mock", user);
       safeStart("shorts", user);
       if (location.hash === "#shorts" || new URLSearchParams(location.search).get("short")) {
         select("shorts");
       } else if (location.hash === "#subject") {
         select("subject");
+      } else if (location.hash === "#mock") {
+        select("mock");
       }
     }
 
