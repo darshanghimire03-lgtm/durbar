@@ -2,6 +2,8 @@
   var SHARE_TEXT = "Join me on Durbar for notes, posts and shorts made for students.";
   var INVITE_TEXT = "I'm using Durbar to study with my classmates. Join me!";
 
+  var APK_URL = "https://github.com/darshanghimire03-lgtm/durbar/releases/download/4.9/Durbar_4.9.apk";
+
   var toastEl = document.getElementById("toast");
   var meAvatar = document.getElementById("meAvatar");
   var meName = document.getElementById("meName");
@@ -63,6 +65,17 @@
     btn.addEventListener("click", function () {
       showToast(btn.getAttribute("data-demo") + " is for demo only");
     });
+  });
+
+  document.getElementById("apkRow").addEventListener("click", function () {
+    var a = document.createElement("a");
+    a.href = APK_URL;
+    a.download = "Durbar_4.9.apk";
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast("Downloading Durbar_4.9.apk");
   });
 
   document.getElementById("shareRow").addEventListener("click", function () {
