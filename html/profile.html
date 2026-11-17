@@ -1,62 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0a0a">
-  <title>Durbar - Photos</title>
-
-  <link rel="icon" type="image/png" href="/favicon.png">
-  <link rel="apple-touch-icon" href="/favicon.png">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <script src="/img-fix.js"></script>
-  <link rel="stylesheet" href="/css/photo.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Profile · Durbar</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/img-fix.js"></script>
+<link rel="stylesheet" href="/css/profile.css">
+<link rel="stylesheet" href="/css/sidebar.css">
 </head>
 <body>
 
-<nav class="photo-navbar">
-  <div class="nav-left">
-    <button class="back-btn" type="button" id="backBtn" aria-label="Go back">
-      <i class="fas fa-arrow-left"></i>
-      <span>Back</span>
-    </button>
-    <div class="nav-info">
-      <span id="noteTitle">Photos</span>
-      <span class="photo-counter" id="photoCounter">0 photos</span>
-    </div>
-  </div>
-  <div class="nav-right">
-    <button class="tool-btn" type="button" id="gridBtn" aria-pressed="false" aria-label="Toggle grid size">
-      <i class="fas fa-th"></i>
-      <span>Grid</span>
-    </button>
-  </div>
+<nav class="side-nav" aria-label="Main">
+  <a class="nav-item" href="/">
+    <svg class="fill-on-active" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8.5a.5.5 0 0 1-.5.5H15v-6H9v6H4.5a.5.5 0 0 1-.5-.5V11z"/></svg>
+    <span>Home</span>
+  </a>
+  <a class="nav-item" href="/#shorts">
+    <svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3.5"/><path d="M10 9.2v5.6l4.6-2.8L10 9.2z"/><path d="M8 4l2 3.2M13 4l2 3.2"/></svg>
+    <span>Shorts</span>
+  </a>
+  <a class="nav-item" href="/#subject">
+    <svg class="fill-on-active" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M5 16.5h14M9 20.5v-1.5M15 20.5v-1.5"/></svg>
+    <span>Subject</span>
+  </a>
 </nav>
 
-<main class="photo-grid-container">
-  <div id="photoGrid" class="photo-grid"></div>
-  <div id="emptyState" class="empty-state">
-    <i class="fas fa-images"></i>
-    <h3>No photos found</h3>
-    <p>This note doesn't have any photos yet.</p>
+<header class="top-bar">
+  <a class="back-btn" id="backBtn" href="/index.html" aria-label="Back">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+  </a>
+  <h1 class="top-title" id="topTitle">Profile</h1>
+  <div class="menu-wrap" id="menuWrap">
+    <button class="menu-btn" type="button" id="menuBtn" aria-label="Menu">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+    </button>
+    <div class="menu" id="menu">
+      <button type="button" id="logoutBtn">Log out</button>
+    </div>
   </div>
-</main>
+</header>
 
-<div class="lightbox-overlay" id="lightboxOverlay" role="dialog" aria-modal="true" aria-label="Photo viewer">
-  <button class="lightbox-close" type="button" id="lbClose" aria-label="Close"><i class="fas fa-times"></i></button>
-  <button class="lightbox-nav prev" type="button" id="lbPrev" aria-label="Previous photo"><i class="fas fa-chevron-left"></i></button>
-  <button class="lightbox-nav next" type="button" id="lbNext" aria-label="Next photo"><i class="fas fa-chevron-right"></i></button>
-  <div class="lightbox-content">
-    <img id="lightboxImage" src="" alt="Photo">
+<div id="ownView" hidden>
+
+<section class="profile">
+  <img class="avatar" id="avatar" src="/favicon.png" alt="Profile photo">
+  <div class="info">
+    <h2 class="name" id="name"></h2>
+    <div class="role-row" id="roleRow">
+      <span class="role" id="role"></span>
+      <svg class="badge" id="badge" viewBox="0 0 24 24" style="display:none"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"/></svg>
+    </div>
+    <div class="btn-row">
+      <button class="change-btn" type="button" id="changeBtn">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="13.2" r="3.4"/><path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill-rule="evenodd"/></svg>
+        <span id="changeLabel">Change profile</span>
+      </button>
+      <button class="share-btn" type="button" id="shareBtn" aria-label="Share">
+        <svg viewBox="0 0 24 24"><path d="M12 15V3.5M7.8 7.7L12 3.5l4.2 4.2M5 11.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7.5"/></svg>
+      </button>
+    </div>
   </div>
-  <div class="lightbox-counter" id="lightboxCounter">1 / 1</div>
+</section>
+
+<input type="file" id="fileInput" accept="image/*" hidden>
+
+<div class="tabs">
+  <button class="tab active" type="button" data-tab="posts">Posts</button>
+  <button class="tab" type="button" data-tab="shorts">Shorts</button>
 </div>
 
-<script src="/js/photo.js"></script>
+<div class="content" id="content"></div>
+
+</div>
+
+<div id="otherView" hidden>
+  <section class="o-profile">
+    <img class="o-avatar" id="oAvatar" src="/favicon.png" alt="Profile photo">
+    <div class="o-info">
+      <h2 class="o-name" id="oName"></h2>
+      <div class="o-role-row">
+        <span class="o-role" id="oRole"></span>
+        <svg class="badge" id="oBadge" viewBox="0 0 24 24" style="display:none"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"/></svg>
+      </div>
+      <div class="o-btn-row">
+        <button class="msg-btn" type="button" id="msgBtn">
+          <svg viewBox="0 0 24 24"><path d="M4.5 4.5h15a1 1 0 0 1 1 1V16a1 1 0 0 1-1 1H9l-4.5 3.5V5.5a1 1 0 0 1 1-1z"/></svg>
+          <span>Message</span>
+        </button>
+        <button class="o-share-btn" type="button" id="oShareBtn" aria-label="Share">
+          <svg viewBox="0 0 24 24"><path d="M12 15V3.5M7.8 7.7L12 3.5l4.2 4.2M5 11.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7.5"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <main class="feed" id="otherFeed"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/js/profile.js"></script>
 
 </body>
 </html>
