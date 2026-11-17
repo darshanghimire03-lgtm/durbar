@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Add event</title>
+<link rel="stylesheet" href="add-event.css">
+</head>
+<body>
+<div class="gate" id="gate">Checking access...</div>
+<div class="in h" id="form">
+  <div class="ph2">
+    <button id="back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div><b id="sTitle">Add event</b><span id="sRole"></span></div>
+  </div>
+  <div class="types" id="sTypes"></div>
+  <button class="fld" id="fSubj" type="button"></button>
+  <input class="fld" id="fTitle" placeholder="Title" maxlength="80">
+  <div class="media" id="fMedia">
+    <div class="pbox" id="fPhoto"><span id="fHint">Tap to upload photo</span></div>
+    <textarea class="fld" id="fDesc" rows="4" placeholder="Description"></textarea>
+  </div>
+  <div id="fDate"><div class="lb">Date</div><button class="fld" id="fStart" type="button" style="margin-top:6px"></button></div>
+  <div id="fRange"><div class="two"><div><div class="lb">From</div><button class="fld" id="fRs" type="button" style="margin-top:6px"></button></div><div><div class="lb">To</div><button class="fld" id="fRe" type="button" style="margin-top:6px"></button></div></div></div>
+  <div id="fTime"><div class="two"><div><div class="lb">Starts</div><input class="fld" id="fTs" type="time" style="margin-top:6px"></div><div><div class="lb">Ends</div><input class="fld" id="fTe" type="time" style="margin-top:6px"></div></div></div>
+  <input type="file" id="fFile" accept="image/*" class="h">
+  <button class="btn p save" id="fSave"></button>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="add-event.js"></script>
+</body>
+</html>
