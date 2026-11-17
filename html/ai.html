@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FDFDFF">
+<title>Durbar Ai</title>
+<script src="/img-fix.js"></script>
+<link rel="stylesheet" href="../css/ai.css">
+<link rel="stylesheet" href="../css/models-sheet.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4.5v15M4.5 12h15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><path fill="currentColor" d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zM17.3 11c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V6M5.5 12.5 12 6l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><path fill="currentColor" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" d="M8 8h8v8H8z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5 10-11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></symbol>
+  <symbol id="i-web" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.47 2 2 6.48 2 12s4.47 10 10 10 10-4.48 10-10S17.52 2 12 2zm6.92 6h-2.95a15.7 15.7 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.99 7.99 0 0 1 5.08 16zM8.03 8H5.08a7.99 7.99 0 0 1 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path fill="currentColor" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 48 48"><path fill="currentColor" d="M20 4Q23.24 18.76 38 22 23.24 25.24 20 40 16.76 25.24 2 22 16.76 18.76 20 4zM40 31Q41.26 36.74 47 38 41.26 39.26 40 45 38.74 39.26 33 38 38.74 36.74 40 31z"/></symbol>
+</svg>
+
+<div id="app">
+  <header>
+    <button id="menu" class="ib" aria-label="Chat history"><svg class="i"><use href="#i-menu"/></svg></button>
+    <h1>Durbar Ai</h1>
+    <button id="newTop" class="ib" aria-label="New chat"><svg class="i"><use href="#i-plus"/></svg></button>
+  </header>
+
+  <main id="scroll">
+    <div id="empty">
+      <svg class="spark"><use href="#i-sparkle"/></svg>
+      <h2 id="greet"></h2>
+    </div>
+    <div id="list"></div>
+  </main>
+
+  <div id="dock">
+    <div id="strip" hidden></div>
+    <form id="bar" autocomplete="off">
+      <div class="row">
+        <button type="button" id="plus" class="ib" aria-label="Add photo"><svg class="i"><use href="#i-plus"/></svg></button>
+        <textarea id="q" rows="1" placeholder="Ask anything…" enterkeyhint="send"></textarea>
+        <button type="button" id="mic" class="ib" aria-label="Voice input"><svg class="i"><use href="#i-mic"/></svg></button>
+        <button type="submit" id="send" aria-label="Voice input"><svg class="i"><use href="#i-mic"/></svg></button>
+      </div>
+      <div class="opts"><button type="button" id="chip">Durbar Ai ▾</button></div>
+    </form>
+    <input type="file" id="file" accept="image/*" multiple hidden>
+  </div>
+</div>
+
+<div id="scrim" hidden></div>
+
+<aside id="drawer" aria-hidden="true">
+  <div class="dh">
+    <svg class="spark sm"><use href="#i-sparkle"/></svg>
+    <span>Durbar Ai</span>
+  </div>
+  <button id="newSide" class="newchat"><svg class="i"><use href="#i-plus"/></svg>New chat</button>
+  <div class="dl">Chat history</div>
+  <div id="hist"></div>
+  <div id="histEmpty">No chats yet</div>
+</aside>
+
+<div id="lb" hidden>
+  <div class="lbt">
+    <button id="lbClose" class="ib" aria-label="Back"><svg class="i"><use href="#i-close"/></svg></button>
+    <span></span>
+    <a id="lbDl" class="ib" download target="_blank" rel="noopener" aria-label="Download"><svg class="i"><use href="#i-download"/></svg></a>
+    <button id="lbShare" class="ib" aria-label="Share"><svg class="i"><use href="#i-share"/></svg></button>
+  </div>
+  <img id="lbImg" alt="Photo">
+</div>
+
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="../js/models-sheet.js"></script>
+<script src="../js/ai.js"></script>
+</body>
+</html>
