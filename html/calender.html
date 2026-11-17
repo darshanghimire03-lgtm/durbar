@@ -1,55 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Calendar</title>
-<link rel="stylesheet" href="calendar.css">
-</head>
-<body>
-<div id="app">
-  <div class="top">
-    <div class="t">
-      <h1>Calendar</h1>
-      <p>Stay organized, never miss an important day.</p>
-    </div>
-    <button class="addBtn" id="userBtn" aria-label="Account"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></button>
-    <button class="addBtn" id="addBtn" aria-label="Add event" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<div class="page-head cl-head">
+  <div class="cl-t">
+    <h1 class="page-title">Calendar</h1>
+    <p class="page-sub">Dates and schedule</p>
   </div>
-  <div class="card">
-    <div class="mh">
-      <button class="nav" id="prev" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <div class="mt"><b id="mLabel"></b><span id="mSub"></span></div>
-      <button class="nav" id="next" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
-    </div>
-    <div class="wk"><span class="r">SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span class="r">SAT</span></div>
-    <div class="grid" id="grid"></div>
-    <div class="legend">
-      <span><i style="background:#EE6B72"></i>Holiday</span>
-      <span><i style="background:#5C8DEB"></i>Exam</span>
-      <span><i style="background:#F5A54A"></i>Test</span>
-      <span><i style="background:#4CAF6A"></i>School event</span>
-    </div>
-  </div>
-  <div class="lh"><h2>Events this month</h2><a id="seeAll">See all</a></div>
-  <div class="list" id="monthList"></div>
-  <div class="empty-t" id="emptyT">No events this month</div>
+  <button class="cl-add" id="clAdd" type="button" aria-label="Add event" hidden><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
 </div>
-<div id="progress"><div class="spin"></div></div>
-<div class="page" id="allPage">
-  <div class="in">
-    <div class="ph2">
-      <button id="allBack" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <div><b>All events</b><span id="allCount"></span></div>
-    </div>
-    <div id="allList"></div>
-    <div class="empty-t" id="allEmpty">No events yet</div>
+<div class="cl-card">
+  <div class="cl-mh">
+    <button class="cl-nav" id="clPrev" type="button" aria-label="Previous month"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="cl-mt"><b id="clLabel"></b><span id="clSub"></span></div>
+    <button class="cl-nav" id="clNext" type="button" aria-label="Next month"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+  <div class="cl-wk"><span class="r">SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span class="r">SAT</span></div>
+  <div class="cl-grid" id="clGrid"></div>
+  <div class="cl-legend">
+    <span><i style="background:#EE6B72"></i>Holiday</span>
+    <span><i style="background:#5C8DEB"></i>Exam</span>
+    <span><i style="background:#F5A54A"></i>Test</span>
+    <span><i style="background:#4CAF6A"></i>School event</span>
   </div>
 </div>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="calendar.js"></script>
-</body>
-</html>
+<div class="cl-lh"><h2>Events this month</h2><a id="clSeeAll" hidden>See all</a></div>
+<div class="cl-list" id="clMonthList"></div>
+<div class="cl-empty" id="clEmpty" hidden>No events this month</div>
+<div class="cl-progress" id="clProgress" hidden><div class="cl-spin"></div></div>
+<div class="cl-page" id="clAllPage" hidden>
+  <div class="cl-in">
+    <div class="cl-ph">
+      <button id="clAllBack" type="button" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div><b>All events</b><span id="clAllCount"></span></div>
+    </div>
+    <div id="clAllList"></div>
+    <div class="cl-empty" id="clAllEmpty" hidden>No events yet</div>
+  </div>
+</div>

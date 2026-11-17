@@ -2,35 +2,60 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Add event</title>
-<link rel="stylesheet" href="add-event.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Durbar · Add event</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/img-fix.js"></script>
+<link rel="stylesheet" href="/css/pages.css">
+<link rel="stylesheet" href="/css/add-event.css">
 </head>
 <body>
-<div class="gate" id="gate">Checking access...</div>
-<div class="in h" id="form">
-  <div class="ph2">
-    <button id="back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <div><b id="sTitle">Add event</b><span id="sRole"></span></div>
+
+<header class="top-bar">
+  <a class="round-btn" id="aeBack" href="/#calender" aria-label="Back">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+  </a>
+  <h1 class="page-title" id="aeTitle">Add event</h1>
+</header>
+
+<div class="ae-gate" id="aeGate">Checking access...</div>
+
+<main class="ae-form" id="aeForm" hidden>
+  <div class="ae-role" id="aeRole"></div>
+  <div class="ae-types" id="aeTypes"></div>
+  <button class="ae-fld" id="aeSubj" type="button"></button>
+  <input class="ae-fld ae-input" id="aeTitleIn" placeholder="Title" maxlength="80">
+  <div class="ae-media" id="aeMedia">
+    <div class="ae-pbox" id="aePhoto"><span id="aeHint">Tap to upload photo</span></div>
+    <textarea class="ae-fld ae-input ae-area" id="aeDesc" rows="4" placeholder="Description"></textarea>
   </div>
-  <div class="types" id="sTypes"></div>
-  <button class="fld" id="fSubj" type="button"></button>
-  <input class="fld" id="fTitle" placeholder="Title" maxlength="80">
-  <div class="media" id="fMedia">
-    <div class="pbox" id="fPhoto"><span id="fHint">Tap to upload photo</span></div>
-    <textarea class="fld" id="fDesc" rows="4" placeholder="Description"></textarea>
+  <div id="aeDate"><div class="ae-lb">Date</div><button class="ae-fld" id="aeStart" type="button"></button></div>
+  <div id="aeRange">
+    <div class="ae-two">
+      <div><div class="ae-lb">From</div><button class="ae-fld" id="aeRs" type="button"></button></div>
+      <div><div class="ae-lb">To</div><button class="ae-fld" id="aeRe" type="button"></button></div>
+    </div>
   </div>
-  <div id="fDate"><div class="lb">Date</div><button class="fld" id="fStart" type="button" style="margin-top:6px"></button></div>
-  <div id="fRange"><div class="two"><div><div class="lb">From</div><button class="fld" id="fRs" type="button" style="margin-top:6px"></button></div><div><div class="lb">To</div><button class="fld" id="fRe" type="button" style="margin-top:6px"></button></div></div></div>
-  <div id="fTime"><div class="two"><div><div class="lb">Starts</div><input class="fld" id="fTs" type="time" style="margin-top:6px"></div><div><div class="lb">Ends</div><input class="fld" id="fTe" type="time" style="margin-top:6px"></div></div></div>
-  <input type="file" id="fFile" accept="image/*" class="h">
-  <button class="btn p save" id="fSave"></button>
-</div>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="add-event.js"></script>
+  <div id="aeTime">
+    <div class="ae-two">
+      <div><div class="ae-lb">Starts</div><input class="ae-fld ae-input" id="aeTs" type="time"></div>
+      <div><div class="ae-lb">Ends</div><input class="ae-fld ae-input" id="aeTe" type="time"></div>
+    </div>
+  </div>
+  <input type="file" id="aeFile" accept="image/*" hidden>
+  <button class="ae-save" id="aeSave" type="button"></button>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/js/add-event.js"></script>
+
 </body>
 </html>
