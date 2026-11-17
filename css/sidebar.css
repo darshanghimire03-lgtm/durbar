@@ -9,6 +9,8 @@
   .side-nav .nav-item:hover { background: var(--tint); }
   .side-nav .nav-item.active { background: var(--tint); color: var(--blue); font-weight: 700; }
   .side-nav .nav-item.active svg.fill-on-active { fill: currentColor; }
+  .side-nav .nav-sep { display: block; flex: 0 0 auto; height: 1.5px; margin: 8px 12px; background: var(--tint); }
+  .menu-wrap { display: none; }
   .composer { left: var(--side-w); right: 0; }
   .toast { left: calc(50% + var(--side-w) / 2); }
 }

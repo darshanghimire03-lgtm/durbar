@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Settings · Durbar</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/img-fix.js"></script>
+<link rel="stylesheet" href="/css/pages.css">
+<link rel="stylesheet" href="/css/setting.css">
+<link rel="stylesheet" href="/css/sidebar.css">
+</head>
+<body>
+
+<nav class="side-nav" aria-label="Main">
+  <a class="nav-item" href="/">
+    <svg class="fill-on-active" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8.5a.5.5 0 0 1-.5.5H15v-6H9v6H4.5a.5.5 0 0 1-.5-.5V11z"/></svg>
+    <span>Home</span>
+  </a>
+  <a class="nav-item" href="/#shorts">
+    <svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3.5"/><path d="M10 9.2v5.6l4.6-2.8L10 9.2z"/><path d="M8 4l2 3.2M13 4l2 3.2"/></svg>
+    <span>Shorts</span>
+  </a>
+  <a class="nav-item" href="/#subject">
+    <svg class="fill-on-active" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M5 16.5h14M9 20.5v-1.5M15 20.5v-1.5"/></svg>
+    <span>Subject</span>
+  </a>
+  <span class="nav-sep"></span>
+  <a class="nav-item" href="/html/profile.html">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+    <span>Profile</span>
+  </a>
+  <a class="nav-item active" href="/html/setting.html">
+    <svg viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9M4 12h5M15 12h5"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/><circle cx="12" cy="12" r="2.5"/></svg>
+    <span>Settings</span>
+  </a>
+</nav>
+
+<header class="top-bar">
+  <a class="round-btn" id="backBtn" href="/html/profile.html" aria-label="Back">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+  </a>
+  <h1 class="page-title">Settings</h1>
+</header>
+
+<main class="settings">
+
+  <a class="me-card" href="/html/profile.html">
+    <img class="me-avatar" id="meAvatar" src="/favicon.png" alt="Profile photo">
+    <div class="me-info">
+      <div class="me-name" id="meName">Profile</div>
+      <div class="me-role" id="meRole"></div>
+    </div>
+    <svg class="row-chevron" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+
+  <section class="group">
+    <h2 class="group-title">Account settings</h2>
+    <div class="group-card">
+      <button class="row" type="button" data-demo="Account centre">
+        <span class="row-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/><circle cx="12" cy="10" r="2.2"/><path d="M8.5 16c.6-1.8 2-2.6 3.5-2.6s2.9.8 3.5 2.6"/></svg>
+        </span>
+        <span class="row-text">
+          <span class="row-label">Account centre</span>
+          <span class="row-sub">Manage your account details</span>
+        </span>
+        <svg class="row-chevron" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="row" type="button" data-demo="Download android app">
+        <span class="row-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg>
+        </span>
+        <span class="row-text">
+          <span class="row-label">Download android app</span>
+          <span class="row-sub">Get Durbar on your phone</span>
+        </span>
+        <svg class="row-chevron" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <section class="group">
+    <h2 class="group-title">Share and invite</h2>
+    <div class="group-card">
+      <button class="row" type="button" id="shareRow">
+        <span class="row-icon">
+          <svg viewBox="0 0 24 24"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4"/></svg>
+        </span>
+        <span class="row-text">
+          <span class="row-label">Share</span>
+          <span class="row-sub">Share Durbar with your friends</span>
+        </span>
+        <svg class="row-chevron" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="row" type="button" id="inviteRow">
+        <span class="row-icon">
+          <svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M2.5 20c0-3.8 3.2-6 7.5-6M18 9v6M15 12h6"/></svg>
+        </span>
+        <span class="row-text">
+          <span class="row-label">Invite student</span>
+          <span class="row-sub">Invite a classmate to join</span>
+        </span>
+        <svg class="row-chevron" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <button class="logout-btn" type="button" id="logoutBtn">
+    <svg viewBox="0 0 24 24"><path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10M15 8l4 4-4 4M19 12H9"/></svg>
+    <span>Log out</span>
+  </button>
+
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/js/setting.js"></script>
+
+</body>
+</html>

@@ -12,7 +12,6 @@
   var badgeEl = document.getElementById("badge");
   var contentEl = document.getElementById("content");
   var toastEl = document.getElementById("toast");
-  var menuEl = document.getElementById("menu");
   var changeBtn = document.getElementById("changeBtn");
   var changeLabel = document.getElementById("changeLabel");
   var fileInput = document.getElementById("fileInput");
@@ -648,19 +647,6 @@
 
   document.getElementById("shareBtn").addEventListener("click", function () {
     shareProfile(currentUser.uid, displayName);
-  });
-
-  document.getElementById("menuBtn").addEventListener("click", function (e) {
-    e.stopPropagation();
-    menuEl.classList.toggle("open");
-  });
-
-  document.addEventListener("click", function () {
-    menuEl.classList.remove("open");
-  });
-
-  document.getElementById("logoutBtn").addEventListener("click", function () {
-    logout();
   });
 
   tabs.forEach(function (tab) {
