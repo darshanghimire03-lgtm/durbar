@@ -3,7 +3,34 @@
   var NAV_URL = "layout/navigation.html";
   var MOCKS_URL = "layout/mocks.html";
   var CALENDER_URL = "layout/calender.html";
+  var SUBJECT_URL = "/html/subject.html";
+  var SHORTS_URL = "/html/shorts.html";
   var TAB_SCRIPTS = ["js/post.js", "js/shorts.js", "js/subject.js", "js/mocks.js", "js/calender.js"];
+  var TAB_PATHS = { home: "/home/", shorts: "/shorts/", subject: "/subject/", mock: "/mock/", calender: "/calendar/" };
+  var PATH_TABS = { home: "home", shorts: "shorts", subject: "subject", mock: "mock", calendar: "calender" };
+
+  function tabFromPath() {
+    var m = location.pathname.match(/^\/(home|shorts|subject|mock|calendar)\/?$/);
+    return m ? PATH_TABS[m[1]] : "";
+  }
+
+  function tabFromLegacyUrl() {
+    if (location.hash === "#shorts" || new URLSearchParams(location.search).get("short")) return "shorts";
+    if (location.hash === "#subject") return "subject";
+    if (location.hash === "#mock") return "mock";
+    if (location.hash === "#calender") return "calender";
+    return "";
+  }
+
+  function setTabUrl(target, replace) {
+    var path = TAB_PATHS[target];
+    if (!path || location.pathname === path) return;
+    if (replace) {
+      history.replaceState({ tab: target }, "", path + location.search);
+    } else {
+      history.pushState({ tab: target }, "", path);
+    }
+  }
 
   function fetchText(url) {
     return fetch(url).then(function (res) {
@@ -88,12 +115,16 @@
     fetchText(HEADER_URL),
     fetchText(NAV_URL),
     fetchOptional(MOCKS_URL),
-    fetchOptional(CALENDER_URL)
+    fetchOptional(CALENDER_URL),
+    fetchText(SUBJECT_URL),
+    fetchText(SHORTS_URL)
   ]).then(function (parts) {
     mount("headerSlot", parts[0]);
     mount("navSlot", parts[1]);
     mount("mockSlot", parts[2]);
     mount("calenderSlot", parts[3]);
+    mount("subjectSlot", parts[4]);
+    mount("shortsSlot", parts[5]);
     return loadTabScripts();
   }).then(initApp).catch(showBootError);
 
@@ -123,8 +154,15 @@
 
     tabButtons.forEach(function (item) {
       item.addEventListener("click", function () {
-        select(item.getAttribute("data-view"));
+        var target = item.getAttribute("data-view");
+        select(target);
+        setTabUrl(target, false);
       });
+    });
+
+    window.addEventListener("popstate", function () {
+      if (!started) return;
+      select(tabFromPath() || "home");
     });
 
     var sheetApi = window.AuthSheet || {
@@ -150,15 +188,9 @@
       safeStart("mock", user);
       safeStart("calender", user);
       safeStart("shorts", user);
-      if (location.hash === "#shorts" || new URLSearchParams(location.search).get("short")) {
-        select("shorts");
-      } else if (location.hash === "#subject") {
-        select("subject");
-      } else if (location.hash === "#mock") {
-        select("mock");
-      } else if (location.hash === "#calender") {
-        select("calender");
-      }
+      var initial = tabFromPath() || tabFromLegacyUrl() || "home";
+      if (initial !== "home") select(initial);
+      setTabUrl(initial, true);
     }
 
     sheetApi.onComplete(startApp);
