@@ -2,14 +2,6 @@
   <div class="as-sheet" role="dialog" aria-modal="true" aria-labelledby="asTitle" aria-describedby="asDesc">
     <div class="as-handle" aria-hidden="true"></div>
 
-    <div class="as-topbar" id="asTopbar" hidden>
-      <button type="button" class="as-back" id="asBack" aria-label="Back">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
-      </button>
-      <div class="as-progress" id="asProgress" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-      <span class="as-step-count" id="asStepCount">1/4</span>
-    </div>
-
     <div class="as-head-text">
       <h2 id="asTitle">Welcome back</h2>
       <p id="asDesc">Sign in to continue to Durbar</p>
@@ -19,7 +11,6 @@
       <div class="as-error" id="asError" role="alert" aria-live="assertive"></div>
       <div class="as-info" id="asInfo" role="status" aria-live="polite"></div>
 
-      <!-- Sign in -->
       <form class="as-email-form" id="asSigninForm" novalidate>
         <label class="as-field">
           <span class="as-label">Email</span>
@@ -42,79 +33,26 @@
         </button>
       </form>
 
-      <!-- Create account / complete profile wizard -->
-      <form class="as-email-form" id="asWizard" novalidate hidden>
-        <section class="as-step" data-step="1">
-          <label class="as-field">
-            <span class="as-label">Full name</span>
-            <input type="text" id="asName" autocomplete="name" placeholder="Your full name">
-          </label>
-          <label class="as-field">
-            <span class="as-label">Email</span>
-            <input type="email" id="asRegEmail" autocomplete="email" inputmode="email" placeholder="you@example.com">
-          </label>
-        </section>
+      <form class="as-email-form" id="asSignupForm" novalidate hidden>
+        <label class="as-field">
+          <span class="as-label">Email</span>
+          <input type="email" id="asRegEmail" autocomplete="email" inputmode="email" placeholder="you@example.com">
+        </label>
 
-        <section class="as-step" data-step="2" hidden>
-          <div class="as-field">
-            <span class="as-label">Phone number</span>
-            <div class="as-phone">
-              <span class="as-prefix">+977</span>
-              <input type="tel" id="asPhone" inputmode="numeric" autocomplete="tel-national" maxlength="10" placeholder="98XXXXXXXX">
-            </div>
-          </div>
-          <div class="as-field" role="radiogroup" aria-labelledby="asGenderLbl">
-            <span class="as-label" id="asGenderLbl">Gender</span>
-            <div class="as-seg">
-              <label><input type="radio" name="gender" value="Male"><span>Male</span></label>
-              <label><input type="radio" name="gender" value="Female"><span>Female</span></label>
-            </div>
-          </div>
-        </section>
+        <label class="as-field">
+          <span class="as-label">Password</span>
+          <span class="as-pass-wrap">
+            <input type="password" id="asNewPass" autocomplete="new-password" placeholder="At least 6 characters">
+            <button type="button" class="as-eye" data-target="asNewPass" aria-label="Show password">Show</button>
+          </span>
+        </label>
 
-        <section class="as-step" data-step="3" hidden>
-          <div class="as-field" role="radiogroup" aria-labelledby="asClassLbl">
-            <span class="as-label" id="asClassLbl">Class level</span>
-            <div class="as-seg">
-              <label><input type="radio" name="classLevel" value="11" checked><span>Class 11</span></label>
-              <label><input type="radio" name="classLevel" value="12"><span>Class 12</span></label>
-            </div>
-          </div>
-          <div class="as-field" role="radiogroup" aria-labelledby="asSectionLbl">
-            <span class="as-label" id="asSectionLbl">Section</span>
-            <div class="as-seg">
-              <label><input type="radio" name="section" value="A"><span>Section A</span></label>
-              <label><input type="radio" name="section" value="B"><span>Section B</span></label>
-            </div>
-          </div>
-        </section>
-
-        <section class="as-step" data-step="4" hidden>
-          <label class="as-field">
-            <span class="as-label">Password</span>
-            <span class="as-pass-wrap">
-              <input type="password" id="asNewPass" autocomplete="new-password" placeholder="At least 6 characters">
-              <button type="button" class="as-eye" data-target="asNewPass" aria-label="Show password">Show</button>
-            </span>
-          </label>
-          <label class="as-field">
-            <span class="as-label">Confirm password</span>
-            <span class="as-pass-wrap">
-              <input type="password" id="asConfirm" autocomplete="new-password" placeholder="Repeat your password">
-              <button type="button" class="as-eye" data-target="asConfirm" aria-label="Show password">Show</button>
-            </span>
-          </label>
-        </section>
-
-        <button type="submit" class="as-submit" id="asNextBtn">
+        <button type="submit" class="as-submit" id="asSignupBtn">
           <span class="as-spinner as-spinner-light" aria-hidden="true"></span>
-          <span id="asNextLabel">Next</span>
+          <span id="asSignupLabel">Create account</span>
         </button>
       </form>
 
-      <button type="button" class="as-link as-signout" id="asSignOut" hidden>Use a different account</button>
-
-      <!-- Google at the bottom -->
       <div id="asGoogleBlock">
         <div class="as-divider"><span>or</span></div>
         <button type="button" class="as-google" id="asGoogleBtn">
