@@ -1,6 +1,7 @@
 {
   "cleanUrls": false,
   "redirects": [
+    { "source": "/html/account-setup.html", "destination": "/account-setup/", "permanent": false },
     { "source": "/comment.html", "destination": "/html/comment.html", "permanent": true },
     { "source": "/unit.html", "destination": "/html/unit.html", "permanent": true },
     { "source": "/notes.html", "destination": "/html/notes.html", "permanent": true },
@@ -12,6 +13,12 @@
     { "source": "/profile/index.html", "destination": "/html/profile.html", "permanent": true }
   ],
   "rewrites": [
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/login/", "destination": "/index.html" },
+    { "source": "/signup", "destination": "/index.html" },
+    { "source": "/signup/", "destination": "/index.html" },
+    { "source": "/account-setup", "destination": "/html/account-setup.html" },
+    { "source": "/account-setup/", "destination": "/html/account-setup.html" },
     { "source": "/firebase-config.js", "destination": "/api/env?bundle=1" },
     { "source": "/post/:id", "destination": "/api/share?type=post&id=:id" },
     { "source": "/post/:id/", "destination": "/api/share?type=post&id=:id" },

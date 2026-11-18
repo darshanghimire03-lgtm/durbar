@@ -1,6 +1,6 @@
 (function () {
-  var SHEET_URL = "layout/auth-sheet.html";
-  var SETUP_URL = "/html/account-setup.html";
+  var SHEET_URL = "/html/auth-sheet.html";
+  var SETUP_URL = "/account-setup/";
 
   var overlay = null;
   var overlayPromise = null;
@@ -56,6 +56,18 @@
         return "Too many attempts. Please try again later.";
       default:
         return "Something went wrong. Please try again.";
+    }
+  }
+
+  function syncUrl(mode) {
+    var path = mode === "signup" ? "/signup/" : "/login/";
+    if (location.pathname === path) return;
+    history.replaceState(null, "", path + location.search + location.hash);
+  }
+
+  function restoreUrl() {
+    if (/^\/(login|signup)\/?$/.test(location.pathname)) {
+      history.replaceState(null, "", "/" + location.search + location.hash);
     }
   }
 
@@ -140,7 +152,7 @@
     var switchText = $("#asSwitchText");
     var switchBtn = $("#asSwitchBtn");
 
-    var mode = "signin";
+    var mode = /^\/signup\/?$/.test(location.pathname) ? "signup" : "signin";
 
     function showError(message) {
       infoBox.classList.remove("visible");
@@ -269,6 +281,7 @@
       clearMessages();
       mode = mode === "signin" ? "signup" : "signin";
       render();
+      syncUrl(mode);
       (mode === "signup" ? regEmail : signinEmail).focus({ preventScroll: true });
     });
 
@@ -294,6 +307,9 @@
 
     ui = {
       setBusy: setBusy,
+      sync: function () {
+        syncUrl(mode);
+      },
       reset: function () {
         mode = "signin";
         clearMessages();
@@ -329,6 +345,7 @@
       if (auth.currentUser) return;
       el.hidden = false;
       document.body.style.overflow = "hidden";
+      if (ui) ui.sync();
     }).catch(function () {
       clearTimeout(retryTimer);
       retryTimer = setTimeout(show, 2000);
@@ -338,6 +355,7 @@
   function hide() {
     if (overlay) overlay.hidden = true;
     document.body.style.overflow = "";
+    restoreUrl();
   }
 
   window.AuthSheet = {

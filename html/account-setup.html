@@ -112,6 +112,15 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
 .submit:disabled { opacity: 0.7; cursor: default; }
 .avatar-btn:focus-visible, .submit:focus-visible, .link:focus-visible { outline: 3px solid rgba(61, 123, 228, 0.45); outline-offset: 3px; }
 
+.seg.locked { opacity: 0.55; pointer-events: none; }
+.field input[readonly] { cursor: not-allowed; }
+.avatar-btn:disabled { cursor: default; }
+.avatar-btn.locked .badge { display: none; }
+.note {
+  padding: 10px 14px; border-radius: 12px; background: #e6eefc; color: #1f4aa8;
+  font-size: 0.88rem; font-weight: 500; line-height: 1.45;
+}
+
 .signout { align-self: center; }
 .foot { margin-top: 22px; text-align: center; font-size: 0.9rem; color: #8a96b0; }
 .foot strong { color: #3d7be4; font-weight: 700; }
@@ -129,6 +138,7 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
 
   <form id="setupForm" novalidate hidden>
     <div class="error" id="errorBox" role="alert" aria-live="assertive"></div>
+    <div class="note" id="lockNote"></div>
 
     <div class="photo-block">
       <button type="button" class="avatar-btn" id="avatarBtn" aria-label="Choose profile photo">
@@ -164,7 +174,7 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
 
     <div class="field" role="radiogroup" aria-labelledby="genderLbl">
       <span class="label" id="genderLbl">Gender</span>
-      <div class="seg">
+      <div class="seg" id="segGender">
         <label><input type="radio" name="gender" value="Male"><span>Male</span></label>
         <label><input type="radio" name="gender" value="Female"><span>Female</span></label>
       </div>
@@ -172,7 +182,7 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
 
     <div class="field" role="radiogroup" aria-labelledby="classLbl">
       <span class="label" id="classLbl">Class level</span>
-      <div class="seg">
+      <div class="seg" id="segClass">
         <label><input type="radio" name="classLevel" value="11" checked><span>Class 11</span></label>
         <label><input type="radio" name="classLevel" value="12"><span>Class 12</span></label>
       </div>
@@ -180,7 +190,7 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
 
     <div class="field" role="radiogroup" aria-labelledby="sectionLbl">
       <span class="label" id="sectionLbl">Section</span>
-      <div class="seg">
+      <div class="seg" id="segSection">
         <label><input type="radio" name="section" value="A"><span>Section A</span></label>
         <label><input type="radio" name="section" value="B"><span>Section B</span></label>
       </div>
@@ -220,8 +230,15 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
   var submitBtn = document.getElementById("submitBtn");
   var submitLabel = document.getElementById("submitLabel");
   var signOutBtn = document.getElementById("signOutBtn");
+  var lockNote = document.getElementById("lockNote");
+  var segs = {
+    gender: document.getElementById("segGender"),
+    classLevel: document.getElementById("segClass"),
+    section: document.getElementById("segSection")
+  };
 
   var currentUser = null;
+  var locked = { fullName: false, phone: false, gender: false, classLevel: false, section: false, photo: false };
   var existingPhoto = "";
   var newPhotoBlob = null;
   var previewUrl = "";
@@ -260,7 +277,7 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
   function setBusy(isBusy) {
     busy = isBusy;
     submitBtn.disabled = isBusy;
-    avatarBtn.disabled = isBusy;
+    avatarBtn.disabled = isBusy || locked.photo;
     removePhoto.disabled = isBusy;
     signOutBtn.disabled = isBusy;
     submitBtn.classList.toggle("loading", isBusy);
@@ -283,7 +300,33 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
     avatarImg.src = src;
     var has = !!(previewUrl || existingPhoto);
     photoHint.textContent = has ? "Tap the photo to change it" : "Tap to add a profile photo";
-    removePhoto.hidden = !has;
+    removePhoto.hidden = locked.photo || !has;
+    if (locked.photo) photoHint.textContent = "Profile photo already saved";
+  }
+
+  function applyLocks(p) {
+    locked.fullName = filled(p.fullName);
+    locked.phone = filled(p.phone);
+    locked.gender = filled(p.gender);
+    locked.classLevel = filled(String(p.classLevel || ""));
+    locked.section = filled(p.section);
+    locked.photo = filled(p.profileImageUrl);
+
+    nameInput.readOnly = locked.fullName;
+    phoneInput.readOnly = locked.phone;
+    ["gender", "classLevel", "section"].forEach(function (key) {
+      segs[key].classList.toggle("locked", locked[key]);
+      Array.prototype.forEach.call(segs[key].querySelectorAll("input"), function (r) {
+        r.disabled = locked[key];
+      });
+    });
+    avatarBtn.disabled = locked.photo;
+    avatarBtn.classList.toggle("locked", locked.photo);
+
+    var any = Object.keys(locked).some(function (k) { return locked[k]; });
+    lockNote.textContent = any
+      ? "Details you already saved are locked. Fill in the missing ones. This can only be done once, so double-check before saving."
+      : "You can set these details only once, so double-check before saving.";
   }
 
   function resizeImage(file, maxSide) {
@@ -344,11 +387,11 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
   }
 
   function validate() {
-    if (nameInput.value.trim().length < 2) return { msg: "Enter your full name.", el: nameInput };
-    if (!/^9[78]\d{8}$/.test(phoneInput.value.trim())) return { msg: "Enter a valid 10-digit phone number (starts with 97 or 98).", el: phoneInput };
-    if (!radioValue("gender")) return { msg: "Select your gender." };
-    if (!radioValue("classLevel")) return { msg: "Select your class level." };
-    if (!radioValue("section")) return { msg: "Select your section." };
+    if (!locked.fullName && nameInput.value.trim().length < 2) return { msg: "Enter your full name.", el: nameInput };
+    if (!locked.phone && !/^9[78]\d{8}$/.test(phoneInput.value.trim())) return { msg: "Enter a valid 10-digit phone number (starts with 97 or 98).", el: phoneInput };
+    if (!locked.gender && !radioValue("gender")) return { msg: "Select your gender." };
+    if (!locked.classLevel && !radioValue("classLevel")) return { msg: "Select your class level." };
+    if (!locked.section && !radioValue("section")) return { msg: "Select your section." };
     return null;
   }
 
@@ -357,31 +400,35 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
     var fullName = nameInput.value.trim();
     return ref.once("value").then(function (snap) {
       var old = snap.val() || {};
-      return ref.update({
+      var data = {
         uid: currentUser.uid,
         email: currentUser.email || old.email || "",
-        fullName: fullName,
-        profileImageUrl: photoUrl !== null ? photoUrl : (old.profileImageUrl || currentUser.photoURL || ""),
         role: old.role || "student",
-        phone: "+977 " + phoneInput.value.trim(),
-        gender: radioValue("gender"),
-        classLevel: radioValue("classLevel"),
-        section: radioValue("section"),
         createdAt: old.createdAt || firebase.database.ServerValue.TIMESTAMP
-      });
+      };
+      if (!locked.fullName) data.fullName = fullName;
+      if (!locked.phone) data.phone = "+977 " + phoneInput.value.trim();
+      if (!locked.gender) data.gender = radioValue("gender");
+      if (!locked.classLevel) data.classLevel = radioValue("classLevel");
+      if (!locked.section) data.section = radioValue("section");
+      if (!locked.photo) {
+        data.profileImageUrl = photoUrl !== null ? photoUrl : (old.profileImageUrl || currentUser.photoURL || "");
+      }
+      return ref.update(data);
     }).then(function () {
+      if (locked.fullName) return;
       return currentUser.updateProfile({ displayName: fullName }).catch(function () {});
     });
   }
 
   avatarBtn.addEventListener("click", function () {
-    if (!busy) fileInput.click();
+    if (!busy && !locked.photo) fileInput.click();
   });
 
   fileInput.addEventListener("change", function () {
     var file = fileInput.files && fileInput.files[0];
     fileInput.value = "";
-    if (!file) return;
+    if (!file || locked.photo) return;
     if (!/^image\//.test(file.type)) {
       showError("Please choose an image file.");
       return;
@@ -404,6 +451,7 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
   });
 
   phoneInput.addEventListener("input", function () {
+    if (locked.phone) return;
     phoneInput.value = phoneInput.value.replace(/\D/g, "").slice(0, 10);
   });
 
@@ -421,11 +469,16 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
 
     setBusy(true);
 
-    var photoStep = newPhotoBlob
-      ? uploadPhoto(newPhotoBlob).catch(function (err) {
-          throw new Error("Couldn't upload your photo: " + (err && err.message ? err.message : "try again") + ". You can remove it and add it later from your profile.");
-        })
-      : Promise.resolve(existingPhoto ? null : "");
+    var photoStep;
+    if (locked.photo) {
+      photoStep = Promise.resolve(null);
+    } else if (newPhotoBlob) {
+      photoStep = uploadPhoto(newPhotoBlob).catch(function (err) {
+        throw new Error("Couldn't upload your photo: " + (err && err.message ? err.message : "try again") + ". You can remove it and add it later from your profile.");
+      });
+    } else {
+      photoStep = Promise.resolve(existingPhoto ? null : "");
+    }
 
     photoStep.then(function (url) {
       return saveProfile(url).then(function () {
@@ -457,6 +510,7 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
         location.replace(nextUrl);
         return;
       }
+      applyLocks(p);
       nameInput.value = p.fullName || user.displayName || "";
       emailInput.value = user.email || p.email || "";
       phoneInput.value = String(p.phone || "").replace(/^\+977/, "").replace(/\D/g, "").slice(0, 10);

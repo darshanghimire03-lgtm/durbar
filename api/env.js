@@ -10,7 +10,7 @@ const auth = firebase.auth();
 
 const SUBJECTS = ["Economic", "Account", "Computer Science", "English", "Nepali"];
 
-const IS_AUTH_PAGE = /^\/(index(\.html)?)?$/.test(location.pathname) || /(^|\/)reset-password(\/(index\.html)?)?$/.test(location.pathname);
+const IS_AUTH_PAGE = /^\/((index(\.html)?)|login\/?|signup\/?)?$/.test(location.pathname) || /(^|\/)reset-password(\/(index\.html)?)?$/.test(location.pathname);
 
 if (!IS_AUTH_PAGE) {
   document.documentElement.style.visibility = "hidden";
