@@ -90,10 +90,11 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
 .phone input { flex: 1; min-width: 0; }
 
 .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.seg.single { grid-template-columns: 1fr; }
 .seg label { position: relative; display: block; cursor: pointer; }
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
 .seg span {
-  height: 50px; display: flex; align-items: center; justify-content: center;
+  min-height: 50px; padding: 0 10px; text-align: center; display: flex; align-items: center; justify-content: center;
   border: 2px solid #d6e2f5; border-radius: 14px; background: #fff;
   font-weight: 600; color: #0c1f4a; transition: all 0.15s ease;
 }
@@ -130,8 +131,8 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
 
 <div class="wrap">
   <div class="head">
-    <h1>Set up your account</h1>
-    <p>Add your photo and details so classmates can recognise you.</p>
+    <h1 id="headTitle">Set up your account</h1>
+    <p id="headSub">Add your photo and details so classmates can recognise you.</p>
   </div>
 
   <div class="loading-box" id="loadingBox"><div class="spinner"></div></div>
@@ -180,19 +181,28 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
       </div>
     </div>
 
+    <div class="field" id="subjectField" role="radiogroup" aria-labelledby="subjectLbl" hidden>
+      <span class="label" id="subjectLbl">Assigned subject</span>
+      <div class="seg" id="segSubject"></div>
+    </div>
+
     <div class="field" role="radiogroup" aria-labelledby="classLbl">
       <span class="label" id="classLbl">Class level</span>
       <div class="seg" id="segClass">
         <label><input type="radio" name="classLevel" value="11" checked><span>Class 11</span></label>
-        <label><input type="radio" name="classLevel" value="12"><span>Class 12</span></label>
+        <label id="class12Label"><input type="radio" name="classLevel" value="12"><span>Class 12</span></label>
       </div>
     </div>
 
-    <div class="field" role="radiogroup" aria-labelledby="sectionLbl">
+    <div class="field" id="sectionField">
       <span class="label" id="sectionLbl">Section</span>
-      <div class="seg" id="segSection">
+      <div class="seg" id="segSection" role="radiogroup" aria-labelledby="sectionLbl">
         <label><input type="radio" name="section" value="A"><span>Section A</span></label>
         <label><input type="radio" name="section" value="B"><span>Section B</span></label>
+      </div>
+      <div class="seg" id="segSectionMulti" role="group" aria-labelledby="sectionLbl" hidden>
+        <label><input type="checkbox" name="sectionMulti" value="A"><span>Section A</span></label>
+        <label><input type="checkbox" name="sectionMulti" value="B"><span>Section B</span></label>
       </div>
     </div>
 
@@ -215,6 +225,7 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
 (function () {
   var MAX_SIDE = 640;
   var DEFAULT_AVATAR = "/favicon.png";
+  var SUBJ = typeof SUBJECTS !== "undefined" ? SUBJECTS : ["Economic", "Account", "Computer Science", "English", "Nepali"];
 
   var form = document.getElementById("setupForm");
   var loadingBox = document.getElementById("loadingBox");
@@ -231,14 +242,25 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
   var submitLabel = document.getElementById("submitLabel");
   var signOutBtn = document.getElementById("signOutBtn");
   var lockNote = document.getElementById("lockNote");
-  var segs = {
-    gender: document.getElementById("segGender"),
-    classLevel: document.getElementById("segClass"),
-    section: document.getElementById("segSection")
+  var headTitle = document.getElementById("headTitle");
+  var headSub = document.getElementById("headSub");
+  var subjectField = document.getElementById("subjectField");
+  var segSubject = document.getElementById("segSubject");
+  var segClass = document.getElementById("segClass");
+  var class12Label = document.getElementById("class12Label");
+  var segSection = document.getElementById("segSection");
+  var segSectionMulti = document.getElementById("segSectionMulti");
+  var sectionLbl = document.getElementById("sectionLbl");
+  var groups = {
+    gender: [document.getElementById("segGender")],
+    classLevel: [segClass],
+    section: [segSection, segSectionMulti],
+    subject: [segSubject]
   };
 
   var currentUser = null;
-  var locked = { fullName: false, phone: false, gender: false, classLevel: false, section: false, photo: false };
+  var locked = { fullName: false, phone: false, gender: false, classLevel: false, section: false, subject: false, photo: false };
+  var isProf = false;
   var existingPhoto = "";
   var newPhotoBlob = null;
   var previewUrl = "";
@@ -259,8 +281,12 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
   }
 
   function isComplete(p) {
-    return !!p && filled(p.fullName) && filled(p.phone) && filled(p.gender) &&
+    if (!p) return false;
+    var base = filled(p.fullName) && filled(p.phone) && filled(p.gender) &&
       filled(String(p.classLevel || "")) && filled(p.section);
+    if (!base) return false;
+    if (String(p.role || "").toLowerCase() === "professor") return filled(p.assignedSubject);
+    return true;
   }
 
   function showError(message) {
@@ -295,6 +321,53 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
     });
   }
 
+  function sectionValue() {
+    if (!isProf) return radioValue("section");
+    var picked = [];
+    Array.prototype.forEach.call(form.querySelectorAll('input[name="sectionMulti"]:checked'), function (c) {
+      picked.push(c.value);
+    });
+    return picked.sort().join(",");
+  }
+
+  function setSection(value) {
+    var parts = String(value || "").split(",").map(function (s) { return s.trim(); });
+    setRadio("section", value);
+    Array.prototype.forEach.call(form.querySelectorAll('input[name="sectionMulti"]'), function (c) {
+      c.checked = parts.indexOf(c.value) !== -1;
+    });
+  }
+
+  function buildSubjects() {
+    segSubject.textContent = "";
+    SUBJ.forEach(function (name) {
+      var label = document.createElement("label");
+      var input = document.createElement("input");
+      input.type = "radio";
+      input.name = "assignedSubject";
+      input.value = name;
+      var span = document.createElement("span");
+      span.textContent = name;
+      label.appendChild(input);
+      label.appendChild(span);
+      segSubject.appendChild(label);
+    });
+  }
+
+  function applyRoleUi() {
+    headTitle.textContent = isProf ? "Set up your professor account" : "Set up your account";
+    headSub.textContent = isProf
+      ? "Add your photo, details and the subject you teach."
+      : "Add your photo and details so classmates can recognise you.";
+    subjectField.hidden = !isProf;
+    segSection.hidden = isProf;
+    segSectionMulti.hidden = !isProf;
+    class12Label.hidden = isProf;
+    segClass.classList.toggle("single", isProf);
+    sectionLbl.textContent = isProf ? "Sections you teach" : "Section";
+    if (isProf) setRadio("classLevel", "11");
+  }
+
   function renderPhoto() {
     var src = previewUrl || existingPhoto || DEFAULT_AVATAR;
     avatarImg.src = src;
@@ -310,14 +383,17 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
     locked.gender = filled(p.gender);
     locked.classLevel = filled(String(p.classLevel || ""));
     locked.section = filled(p.section);
+    locked.subject = isProf && filled(p.assignedSubject);
     locked.photo = filled(p.profileImageUrl);
 
     nameInput.readOnly = locked.fullName;
     phoneInput.readOnly = locked.phone;
-    ["gender", "classLevel", "section"].forEach(function (key) {
-      segs[key].classList.toggle("locked", locked[key]);
-      Array.prototype.forEach.call(segs[key].querySelectorAll("input"), function (r) {
-        r.disabled = locked[key];
+    ["gender", "classLevel", "section", "subject"].forEach(function (key) {
+      groups[key].forEach(function (seg) {
+        seg.classList.toggle("locked", locked[key]);
+        Array.prototype.forEach.call(seg.querySelectorAll("input"), function (r) {
+          r.disabled = locked[key];
+        });
       });
     });
     avatarBtn.disabled = locked.photo;
@@ -390,8 +466,9 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
     if (!locked.fullName && nameInput.value.trim().length < 2) return { msg: "Enter your full name.", el: nameInput };
     if (!locked.phone && !/^9[78]\d{8}$/.test(phoneInput.value.trim())) return { msg: "Enter a valid 10-digit phone number (starts with 97 or 98).", el: phoneInput };
     if (!locked.gender && !radioValue("gender")) return { msg: "Select your gender." };
+    if (isProf && !locked.subject && !radioValue("assignedSubject")) return { msg: "Select your assigned subject." };
     if (!locked.classLevel && !radioValue("classLevel")) return { msg: "Select your class level." };
-    if (!locked.section && !radioValue("section")) return { msg: "Select your section." };
+    if (!locked.section && !sectionValue()) return { msg: isProf ? "Select at least one section." : "Select your section." };
     return null;
   }
 
@@ -409,8 +486,9 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
       if (!locked.fullName) data.fullName = fullName;
       if (!locked.phone) data.phone = "+977 " + phoneInput.value.trim();
       if (!locked.gender) data.gender = radioValue("gender");
-      if (!locked.classLevel) data.classLevel = radioValue("classLevel");
-      if (!locked.section) data.section = radioValue("section");
+      if (!locked.classLevel) data.classLevel = isProf ? "11" : radioValue("classLevel");
+      if (!locked.section) data.section = sectionValue();
+      if (isProf && !locked.subject) data.assignedSubject = radioValue("assignedSubject");
       if (!locked.photo) {
         data.profileImageUrl = photoUrl !== null ? photoUrl : (old.profileImageUrl || currentUser.photoURL || "");
       }
@@ -503,6 +581,7 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
     if (started) return;
     started = true;
     currentUser = user;
+    buildSubjects();
 
     db.ref("users").child(user.uid).once("value").then(function (snap) {
       var p = snap.val() || {};
@@ -510,13 +589,16 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
         location.replace(nextUrl);
         return;
       }
+      isProf = String(p.role || "").toLowerCase() === "professor";
+      applyRoleUi();
       applyLocks(p);
       nameInput.value = p.fullName || user.displayName || "";
       emailInput.value = user.email || p.email || "";
       phoneInput.value = String(p.phone || "").replace(/^\+977/, "").replace(/\D/g, "").slice(0, 10);
       setRadio("gender", p.gender);
-      setRadio("classLevel", p.classLevel || "11");
-      setRadio("section", p.section);
+      setRadio("classLevel", isProf ? "11" : (p.classLevel || "11"));
+      setSection(p.section);
+      setRadio("assignedSubject", p.assignedSubject);
       existingPhoto = (typeof p.profileImageUrl === "string" && p.profileImageUrl) || user.photoURL || "";
       renderPhoto();
       loadingBox.hidden = true;

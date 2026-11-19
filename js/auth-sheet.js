@@ -13,6 +13,8 @@
   var redirectChecked = false;
   var retryTimer = null;
   var nextUrl = readNext();
+  var profToken = readProfToken();
+  var inviteOk = false;
 
   function readNext() {
     var raw = new URLSearchParams(location.search).get("next") || "";
@@ -20,6 +22,18 @@
     if (raw.indexOf("//") !== -1 || raw.indexOf("..") !== -1) return "";
     if (/^\/(index\.html)?([?#].*)?$/.test(raw)) return "";
     return raw;
+  }
+
+  function readProfToken() {
+    var m = location.pathname.match(/^\/signup\/prof\/([A-Za-z0-9]{4,40})\/?$/);
+    return m ? m[1] : "";
+  }
+
+  function checkInvite() {
+    return db.ref("invite/proflinks").child(profToken).once("value").then(function (snap) {
+      var v = snap.val();
+      return !!v && v.accessToken === profToken;
+    });
   }
 
   function messageFor(code) {
@@ -60,13 +74,14 @@
   }
 
   function syncUrl(mode) {
+    if (profToken) return;
     var path = mode === "signup" ? "/signup/" : "/login/";
     if (location.pathname === path) return;
     history.replaceState(null, "", path + location.search + location.hash);
   }
 
   function restoreUrl() {
-    if (/^\/(login|signup)\/?$/.test(location.pathname)) {
+    if (/^\/(login|signup)(\/prof\/[A-Za-z0-9]+)?\/?$/.test(location.pathname)) {
       history.replaceState(null, "", "/" + location.search + location.hash);
     }
   }
@@ -76,20 +91,26 @@
   }
 
   function isComplete(p) {
-    return !!p && filled(p.fullName) && filled(p.phone) && filled(p.gender) &&
+    if (!p) return false;
+    var base = filled(p.fullName) && filled(p.phone) && filled(p.gender) &&
       filled(String(p.classLevel || "")) && filled(p.section);
+    if (!base) return false;
+    if (String(p.role || "").toLowerCase() === "professor") return filled(p.assignedSubject);
+    return true;
   }
 
-  function createBaseProfile(user) {
+  function createBaseProfile(user, role, token) {
     var ref = db.ref("users").child(user.uid);
     return ref.once("value").then(function (snap) {
       var old = snap.val() || {};
-      return ref.update({
+      var data = {
         uid: user.uid,
         email: user.email || old.email || "",
-        role: old.role || "student",
+        role: role || old.role || "student",
         createdAt: old.createdAt || firebase.database.ServerValue.TIMESTAMP
-      });
+      };
+      if (token) data.inviteToken = token;
+      return ref.update(data);
     });
   }
 
@@ -147,12 +168,14 @@
     var signupBtn = $("#asSignupBtn");
     var signupLabel = $("#asSignupLabel");
 
+    var googleBlock = $("#asGoogleBlock");
     var googleBtn = $("#asGoogleBtn");
     var googleLabel = $("#asGoogleLabel");
+    var switchRow = $("#asSwitchRow");
     var switchText = $("#asSwitchText");
     var switchBtn = $("#asSwitchBtn");
 
-    var mode = /^\/signup\/?$/.test(location.pathname) ? "signup" : "signin";
+    var mode = profToken || /^\/signup\/?$/.test(location.pathname) ? "signup" : "signin";
 
     function showError(message) {
       infoBox.classList.remove("visible");
@@ -177,7 +200,7 @@
       busy = isBusy;
       googleBtn.disabled = isBusy;
       signinBtn.disabled = isBusy;
-      signupBtn.disabled = isBusy;
+      signupBtn.disabled = isBusy || (!!profToken && !inviteOk);
       googleBtn.classList.toggle("loading", isBusy && which === "google");
       signinBtn.classList.toggle("loading", isBusy && which === "signin");
       signupBtn.classList.toggle("loading", isBusy && which === "signup");
@@ -190,6 +213,15 @@
       var signin = mode === "signin";
       signinForm.hidden = !signin;
       signupForm.hidden = signin;
+      if (profToken) {
+        titleEl.textContent = "Professor sign up";
+        descEl.textContent = "Create your professor account. You'll add your details next.";
+        switchRow.hidden = true;
+        googleBlock.hidden = true;
+        return;
+      }
+      switchRow.hidden = false;
+      googleBlock.hidden = false;
       if (signin) {
         titleEl.textContent = "Welcome back";
         descEl.textContent = "Sign in to continue to Durbar";
@@ -223,6 +255,7 @@
     signupForm.addEventListener("submit", function (e) {
       e.preventDefault();
       if (busy) return;
+      if (profToken && !inviteOk) return;
       clearMessages();
       var email = regEmail.value.trim();
       var password = newPass.value;
@@ -232,7 +265,9 @@
       setBusy(true, "signup");
       signingUp = true;
       auth.createUserWithEmailAndPassword(email, password).then(function (cred) {
-        return createBaseProfile(cred.user).catch(function () {});
+        return createBaseProfile(cred.user, profToken ? "professor" : "", profToken).catch(function (err) {
+          if (profToken) throw err;
+        });
       }).then(function () {
         signingUp = false;
         goToSetup();
@@ -277,7 +312,7 @@
     });
 
     switchBtn.addEventListener("click", function () {
-      if (busy) return;
+      if (busy || profToken) return;
       clearMessages();
       mode = mode === "signin" ? "signup" : "signin";
       render();
@@ -305,13 +340,26 @@
 
     render();
 
+    if (profToken) {
+      setBusy(false);
+      checkInvite().then(function (ok) {
+        inviteOk = ok;
+        setBusy(false);
+        if (!ok) showError("This invitation link is invalid or has expired.");
+      }).catch(function () {
+        inviteOk = false;
+        setBusy(false);
+        showError("Couldn't verify the invitation link. Check your connection and reload.");
+      });
+    }
+
     ui = {
       setBusy: setBusy,
       sync: function () {
         syncUrl(mode);
       },
       reset: function () {
-        mode = "signin";
+        mode = profToken ? "signup" : "signin";
         clearMessages();
         setBusy(false);
         render();
