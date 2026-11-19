@@ -11,13 +11,14 @@
 
   var userCache = {};
   var me = null;
-  var meName = "";
-  var mePhoto = "";
+  var viewerSections = [];
   var renderToken = 0;
   var stickBottom = false;
-  var listening = false;
+  var started = false;
+  var hasMine = false;
   var postTemplate = null;
   var templatePromise = null;
+  var postCard = null;
 
   function el(tag, className, text) {
     var node = document.createElement(tag);
@@ -52,17 +53,51 @@
     return d.toLocaleDateString("en-US", { month: "long" }) + " " + String(d.getDate()).padStart(2, "0");
   }
 
-  function likeInfo(post, uid) {
-    var l = post.likes;
-    if (l && typeof l === "object") {
-      var keys = Object.keys(l);
-      return {
-        count: keys.length,
-        liked: !!uid && keys.indexOf(uid) !== -1 && l[uid] !== false
-      };
+  function sectionsOf(value) {
+    return String(value || "").split(",").map(function (s) {
+      return s.replace(/^section/i, "").trim().toUpperCase();
+    }).filter(Boolean);
+  }
+
+  function parsePrivacy(raw) {
+    var s = String(raw === undefined || raw === null || raw === "" ? "everyone" : raw).trim().toLowerCase();
+    if (s === "everyone") return { all: true, label: "" };
+    var m = s.match(/^section\s*([a-z])$/);
+    if (m) {
+      var letter = m[1].toUpperCase();
+      return { all: false, section: letter, label: "Section " + letter };
     }
-    if (typeof l === "number") return { count: l, liked: false };
+    return null;
+  }
+
+  function canView(post) {
+    if (me && post.authorUid && post.authorUid === me.uid) return true;
+    var p = parsePrivacy(post.privacy);
+    if (!p) return false;
+    if (p.all) return true;
+    return viewerSections.indexOf(p.section) !== -1;
+  }
+
+  function likeInfo(likes, uid) {
+    if (likes && typeof likes === "object") {
+      var keys = Object.keys(likes).filter(function (k) { return !!likes[k]; });
+      return { count: keys.length, liked: !!uid && keys.indexOf(uid) !== -1 };
+    }
+    if (typeof likes === "number") return { count: likes, liked: false };
     return { count: 0, liked: false };
+  }
+
+  function photosOf(v) {
+    var out = [];
+    var raw = v.photos;
+    if (Array.isArray(raw)) {
+      out = raw;
+    } else if (raw && typeof raw === "object") {
+      out = Object.keys(raw).sort(function (a, b) { return Number(a) - Number(b); }).map(function (k) { return raw[k]; });
+    }
+    out = out.filter(function (u) { return typeof u === "string" && /^https?:\/\//i.test(u); });
+    if (!out.length && typeof v.imageUrl === "string" && v.imageUrl) out = [v.imageUrl];
+    return out;
   }
 
   function linkify(container, text) {
@@ -91,8 +126,12 @@
     listEl.appendChild(el("div", "state", message));
   }
 
+  function postRef() {
+    return db.ref("posts").child(postId);
+  }
+
   function commentsRef() {
-    return db.ref("posts").child(postId).child("comments");
+    return postRef().child("comments");
   }
 
   function loadUser(uid) {
@@ -103,9 +142,11 @@
         return {
           name: typeof u.fullName === "string" ? u.fullName : "",
           photo: typeof u.profileImageUrl === "string" ? u.profileImageUrl : "",
-          role: typeof u.role === "string" ? u.role : ""
+          role: typeof u.role === "string" ? u.role : "",
+          section: typeof u.section === "string" ? u.section : ""
         };
       }).catch(function () {
+        delete userCache[uid];
         return {};
       });
     }
@@ -132,11 +173,66 @@
     return templatePromise;
   }
 
+  function applyLike(btn, liked, count) {
+    btn.classList.toggle("on", liked);
+    btn.setAttribute("aria-pressed", liked ? "true" : "false");
+    btn.querySelector(".count").textContent = String(count);
+  }
+
+  function toggleLike(btn) {
+    if (!me || btn.disabled) return;
+    var was = btn.classList.contains("on");
+    var count = parseInt(btn.querySelector(".count").textContent, 10) || 0;
+    applyLike(btn, !was, Math.max(0, count + (was ? -1 : 1)));
+    btn.disabled = true;
+    var ref = postRef().child("likes").child(me.uid);
+    var op = was ? ref.remove() : ref.set(true);
+    op.catch(function () {
+      applyLike(btn, was, count);
+      showToast("Couldn't update your like");
+    }).then(function () {
+      btn.disabled = false;
+    });
+  }
+
+  function buildPhotos(card, photos) {
+    var box = card.querySelector(".post-photos");
+    if (!box) return;
+    if (!photos.length) {
+      box.remove();
+      return;
+    }
+    var shown = photos.slice(0, 4);
+    box.className = "post-photos n" + shown.length;
+    shown.forEach(function (url, i) {
+      var cell = el("div", "ph");
+      var img = document.createElement("img");
+      img.alt = "";
+      img.loading = "lazy";
+      img.onerror = function () {
+        cell.hidden = true;
+      };
+      img.src = url;
+      cell.appendChild(img);
+      if (i === 3 && photos.length > 4) {
+        cell.appendChild(el("span", "ph-more", "+" + (photos.length - 4)));
+      }
+      cell.addEventListener("click", function () {
+        window.open(url, "_blank", "noopener");
+      });
+      box.appendChild(cell);
+    });
+    box.hidden = false;
+  }
+
   function buildPost(post, u) {
     var role = (post.authorRole || u.role || "").toLowerCase();
     var name = u.name || post.authorName || "Durbar User";
     var photo = u.photo || post.authorPhoto || "";
+    var privacy = parsePrivacy(post.privacy);
     var dateLabel = formatDate(post.createdAt);
+    var dateText = dateLabel;
+    if (privacy && privacy.label) dateText = dateLabel ? dateLabel + " \u00b7 " + privacy.label : privacy.label;
 
     var card = postTemplate.cloneNode(true);
 
@@ -165,11 +261,11 @@
       roleEl.textContent = role;
       roleEl.hidden = false;
     }
-    if (dateLabel) {
-      dateEl.textContent = dateLabel;
+    if (dateText) {
+      dateEl.textContent = dateText;
       dateEl.hidden = false;
     }
-    dotEl.hidden = !(role && dateLabel);
+    dotEl.hidden = !(role && dateText);
 
     var body = card.querySelector(".post-text");
     card.querySelector(".see-more").remove();
@@ -179,21 +275,17 @@
       body.hidden = false;
     }
 
-    var img = card.querySelector(".post-image");
-    if (post.imageUrl) {
-      img.onerror = function () {
-        img.hidden = true;
-      };
-      img.src = post.imageUrl;
-      img.hidden = false;
-    } else {
-      img.remove();
-    }
+    buildPhotos(card, post.photos);
 
-    var info = likeInfo(post, me ? me.uid : "");
+    var info = likeInfo(post.likes, me ? me.uid : "");
     var likeBtn = card.querySelector(".action.like");
-    likeBtn.classList.toggle("on", info.liked);
-    likeBtn.querySelector(".count").textContent = String(info.count);
+    applyLike(likeBtn, info.liked, info.count);
+    likeBtn.addEventListener("click", function () {
+      toggleLike(likeBtn);
+    });
+
+    var cc = card.querySelector(".action.comment .count");
+    if (cc) cc.textContent = String(post.commentCount);
 
     card.querySelector(".action.comment").addEventListener("click", function () {
       input.focus();
@@ -213,24 +305,64 @@
     return card;
   }
 
+  function normalizePost(v) {
+    return {
+      authorUid: typeof v.authorUid === "string" ? v.authorUid : "",
+      authorName: typeof v.authorName === "string" ? v.authorName : "",
+      authorPhoto: typeof v.authorPhoto === "string" ? v.authorPhoto : "",
+      authorRole: typeof v.authorRole === "string" ? v.authorRole : "",
+      createdAt: typeof v.createdAt === "number" ? v.createdAt : 0,
+      text: typeof v.text === "string" ? v.text : "",
+      photos: photosOf(v),
+      privacy: typeof v.privacy === "string" ? v.privacy : "",
+      likes: v.likes !== undefined ? v.likes : v.likeCount,
+      commentCount: v.comments && typeof v.comments === "object" ? Object.keys(v.comments).length : 0
+    };
+  }
+
+  function blocked(message) {
+    composer.hidden = true;
+    postBox.textContent = "";
+    showState(message);
+  }
+
+  function watchLikes() {
+    var btn = postCard.querySelector(".action.like");
+    postRef().child("likes").on("value", function (snap) {
+      var info = likeInfo(snap.val(), me.uid);
+      applyLike(btn, info.liked, info.count);
+    });
+  }
+
   function loadPost() {
-    Promise.all([loadTemplate(), db.ref("posts").child(postId).once("value")]).then(function (results) {
+    return Promise.all([loadTemplate(), postRef().once("value")]).then(function (results) {
       var v = results[1].val();
-      if (!v || typeof v !== "object") return;
-      var authorUid = typeof v.authorUid === "string" ? v.authorUid : "";
-      return loadUser(authorUid).then(function (u) {
+      if (!v || typeof v !== "object") {
+        blocked("Post not found.");
+        return false;
+      }
+      var post = normalizePost(v);
+      if (!canView(post)) {
+        blocked("This post isn't available to you.");
+        return false;
+      }
+      return loadUser(post.authorUid).then(function (u) {
         postBox.textContent = "";
-        postBox.appendChild(buildPost({
-          authorName: typeof v.authorName === "string" ? v.authorName : "",
-          authorPhoto: typeof v.authorPhoto === "string" ? v.authorPhoto : "",
-          authorRole: typeof v.authorRole === "string" ? v.authorRole : "",
-          createdAt: typeof v.createdAt === "number" ? v.createdAt : 0,
-          text: typeof v.text === "string" ? v.text : "",
-          imageUrl: typeof v.imageUrl === "string" ? v.imageUrl : "",
-          likes: v.likes !== undefined ? v.likes : v.likeCount
-        }, u));
+        postCard = buildPost(post, u);
+        postBox.appendChild(postCard);
+        watchLikes();
+        return true;
       });
-    }).catch(function () {});
+    }).catch(function () {
+      blocked("Couldn't load this post.");
+      return false;
+    });
+  }
+
+  function setCommentCount(n) {
+    if (!postCard) return;
+    var cc = postCard.querySelector(".action.comment .count");
+    if (cc) cc.textContent = String(n);
   }
 
   function buildComment(c) {
@@ -260,8 +392,33 @@
     if (ago) head.appendChild(el("span", "c-time", ago));
     bubble.appendChild(head);
     bubble.appendChild(el("div", "c-text", c.text));
-    row.appendChild(bubble);
 
+    if (me && c.uid === me.uid) {
+      var acts = el("div", "c-acts");
+
+      var edit = el("button", "c-act", "Edit");
+      edit.type = "button";
+      edit.addEventListener("click", function () {
+        input.value = c.text;
+        input.focus();
+      });
+      acts.appendChild(edit);
+
+      var del = el("button", "c-act danger", "Delete");
+      del.type = "button";
+      del.addEventListener("click", function () {
+        del.disabled = true;
+        commentsRef().child(c.id).remove().catch(function () {
+          del.disabled = false;
+          showToast("Couldn't delete your comment");
+        });
+      });
+      acts.appendChild(del);
+
+      bubble.appendChild(acts);
+    }
+
+    row.appendChild(bubble);
     return row;
   }
 
@@ -281,25 +438,19 @@
     }
   }
 
-  function pickString(v, keys) {
-    for (var i = 0; i < keys.length; i++) {
-      if (typeof v[keys[i]] === "string" && v[keys[i]]) return v[keys[i]];
-    }
-    return "";
-  }
-
   function listen() {
     commentsRef().on("value", function (snap) {
       var token = ++renderToken;
       var list = [];
+      var mine = false;
       snap.forEach(function (child) {
         var v = child.val();
         if (v && typeof v === "object") {
+          var uid = typeof v.uid === "string" && v.uid ? v.uid : child.key;
+          if (me && child.key === me.uid) mine = true;
           list.push({
             id: child.key,
-            uid: pickString(v, ["authorUid", "uid", "userId", "authorId"]),
-            authorName: pickString(v, ["authorName", "userName", "name"]),
-            authorPhoto: pickString(v, ["authorPhoto", "userPhoto", "photoUrl"]),
+            uid: uid,
             text: typeof v.text === "string" ? v.text : "",
             createdAt: typeof v.createdAt === "number" ? v.createdAt : 0
           });
@@ -309,6 +460,10 @@
         return a.createdAt - b.createdAt;
       });
 
+      hasMine = mine;
+      input.placeholder = mine ? "Update your comment" : "Add a comment";
+      setCommentCount(list.length);
+
       Promise.all(list.map(function (c) {
         return loadUser(c.uid);
       })).then(function (users) {
@@ -317,8 +472,9 @@
           var u = users[i] || {};
           return {
             id: c.id,
-            name: u.name || c.authorName || "Durbar User",
-            photo: u.photo || c.authorPhoto || "",
+            uid: c.uid,
+            name: u.name || "Durbar User",
+            photo: u.photo || "",
             text: c.text,
             createdAt: c.createdAt
           };
@@ -329,28 +485,19 @@
     });
   }
 
-  function loadMe(user) {
-    meName = user.displayName || (user.email ? user.email.split("@")[0] : "");
-    mePhoto = user.photoURL || "";
-    loadUser(user.uid).then(function (u) {
-      if (u.name) meName = u.name;
-      if (u.photo) mePhoto = u.photo;
-    });
-  }
-
   function send() {
     var text = input.value.trim();
     if (!text || !me || sendBtn.disabled) return;
     sendBtn.disabled = true;
     stickBottom = true;
-    commentsRef().push({
-      authorUid: me.uid,
-      authorName: meName,
-      authorPhoto: mePhoto,
+    var updating = hasMine;
+    commentsRef().child(me.uid).set({
+      uid: me.uid,
       text: text,
       createdAt: firebase.database.ServerValue.TIMESTAMP
     }).then(function () {
       input.value = "";
+      if (updating) showToast("Comment updated");
     }).catch(function () {
       stickBottom = false;
       showToast("Couldn't post your comment");
@@ -373,19 +520,24 @@
     }
   });
 
+  function start(user) {
+    if (started) return;
+    started = true;
+    me = user;
+    loadUser(user.uid).then(function (u) {
+      viewerSections = sectionsOf(u.section);
+      return loadPost();
+    }).then(function (ok) {
+      if (ok) listen();
+    });
+  }
+
   if (!postId) {
     composer.hidden = true;
     showState("Post not found.");
   } else {
     auth.onAuthStateChanged(function (user) {
-      if (!user) return;
-      me = user;
-      loadMe(user);
-      if (!listening) {
-        listening = true;
-        loadPost();
-        listen();
-      }
+      if (user) start(user);
     });
   }
 })();

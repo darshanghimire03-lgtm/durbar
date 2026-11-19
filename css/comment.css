@@ -384,3 +384,18 @@ body { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
   .post-text { font-size: 1rem; }
   .bubble { padding: 10px 12px; }
 }
+
+.action.like:disabled { opacity: 0.7; }
+.post-photos { display: grid; gap: 4px; margin-top: 14px; border-radius: 18px; overflow: hidden; background: #d9e3f6; }
+.post-photos[hidden] { display: none; }
+.post-photos .ph { position: relative; overflow: hidden; cursor: zoom-in; min-height: 0; }
+.post-photos .ph img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.post-photos.n1 .ph img { max-height: 420px; }
+.post-photos.n2, .post-photos.n3, .post-photos.n4 { grid-template-columns: 1fr 1fr; }
+.post-photos.n2 .ph, .post-photos.n3 .ph, .post-photos.n4 .ph { aspect-ratio: 1; }
+.post-photos.n3 .ph:first-child { grid-row: span 2; aspect-ratio: auto; }
+.post-photos .ph-more { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(12, 31, 74, 0.55); color: #fff; font-weight: 700; font-size: 1.6rem; }
+.c-acts { display: flex; gap: 12px; margin-top: 6px; }
+.c-act { border: 0; background: none; padding: 0; font-family: inherit; font-size: 0.8rem; font-weight: 600; color: #6b7a99; cursor: pointer; }
+.c-act.danger { color: #c62828; }
+.c-act:disabled { opacity: 0.5; cursor: default; }
