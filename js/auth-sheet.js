@@ -107,10 +107,17 @@
         uid: user.uid,
         email: user.email || old.email || "",
         role: role || old.role || "student",
-        createdAt: old.createdAt || firebase.database.ServerValue.TIMESTAMP
+        createdAt: old.createdAt || firebase.database.ServerValue.TIMESTAMP,
+        fullName: old.fullName || user.displayName || "",
+        phone: old.phone || "",
+        gender: old.gender || "",
+        profileImageUrl: old.profileImageUrl || user.photoURL || ""
       };
       if (token) data.inviteToken = token;
       return ref.update(data);
+    }).then(function () {
+      if (!token) return;
+      return ref.child("inviteToken").remove().catch(function () {});
     });
   }
 
