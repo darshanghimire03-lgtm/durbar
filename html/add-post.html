@@ -1,0 +1,59 @@
+,<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Durbar · Create post</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/img-fix.js"></script>
+<link rel="stylesheet" href="/css/pages.css">
+<link rel="stylesheet" href="/css/add-post.css">
+</head>
+<body>
+
+<header class="top-bar">
+  <a class="round-btn" id="apBack" href="/" aria-label="Back">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+  </a>
+  <h1 class="page-title">Create post</h1>
+</header>
+
+<div class="ap-gate" id="apGate">Loading...</div>
+
+<main class="ap-form" id="apForm" hidden>
+  <div class="ap-author">
+    <img class="ap-avatar" id="apAvatar" src="/favicon.png" alt="">
+    <div>
+      <div class="ap-name" id="apName"></div>
+      <div class="ap-role" id="apRole"></div>
+    </div>
+  </div>
+
+  <div class="ap-lb">Who can see this</div>
+  <div class="ap-aud" id="apAudience" role="radiogroup" aria-label="Audience"></div>
+
+  <textarea class="ap-text" id="apText" rows="6" maxlength="2000" placeholder="What's on your mind?"></textarea>
+  <div class="ap-count"><span id="apChars">0</span>/2000</div>
+
+  <div class="ap-lb">Photos <span class="ap-lb-count" id="apPhotoCount">0/8</span></div>
+  <div class="ap-grid" id="apGrid"></div>
+  <input type="file" id="apFile" accept="image/*" multiple hidden>
+
+  <button class="ap-post" id="apPost" type="button" disabled>Post</button>
+</main>
+
+<div class="ap-toast" id="apToast" role="status" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/js/add-post.js"></script>
+
+</body>
+</html>
