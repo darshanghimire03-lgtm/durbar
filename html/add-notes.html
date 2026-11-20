@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Durbar · Add note</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/img-fix.js"></script>
+<link rel="stylesheet" href="/css/pages.css">
+<link rel="stylesheet" href="/css/add-notes.css">
+</head>
+<body>
+
+<header class="top-bar">
+  <a class="round-btn" id="anBack" href="/#subject" aria-label="Back">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+  </a>
+  <h1 class="page-title">Add note</h1>
+</header>
+
+<div class="an-gate" id="anGate">Checking access...</div>
+
+<main class="an-form" id="anForm" hidden>
+  <div class="an-ctx" id="anCtx"></div>
+
+  <div class="an-lb">Title</div>
+  <input class="an-input" id="anTitle" type="text" maxlength="120" placeholder="Note title" autocomplete="off">
+
+  <div class="an-lb">Description <span class="an-opt">optional</span></div>
+  <textarea class="an-input an-area" id="anDesc" rows="5" maxlength="2000" placeholder="Write the note"></textarea>
+  <div class="an-count"><span id="anChars">0</span>/2000</div>
+
+  <div class="an-lb">Photos <span class="an-lb-count" id="anPhotoCount">0/6</span></div>
+  <div class="an-grid" id="anPhotoGrid"></div>
+  <input type="file" id="anPhotoFile" accept="image/*" multiple hidden>
+
+  <div class="an-lb">PDF files <span class="an-lb-count" id="anPdfCount">0/5</span></div>
+  <div class="an-pdfs" id="anPdfList"></div>
+  <input type="file" id="anPdfFile" accept="application/pdf,.pdf" multiple hidden>
+  <div class="an-hint">PDF files up to 10 MB each.</div>
+
+  <div class="an-lb">YouTube links <span class="an-lb-count" id="anLinkCount">0/5</span></div>
+  <div class="an-link-row">
+    <input class="an-input" id="anLinkInput" type="url" placeholder="Paste a YouTube link" autocomplete="off" inputmode="url">
+    <button class="an-small" id="anLinkAdd" type="button">Add</button>
+  </div>
+  <div class="an-links" id="anLinks"></div>
+
+  <button class="an-publish" id="anPublish" type="button" disabled>Publish note</button>
+</main>
+
+<div class="an-toast" id="anToast" role="status" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/js/add-notes.js"></script>
+
+</body>
+</html>

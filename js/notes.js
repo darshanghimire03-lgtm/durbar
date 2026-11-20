@@ -3,6 +3,7 @@
 
   var SVG_NS = "http://www.w3.org/2000/svg";
   var FILE_PATH = "M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z";
+  var ADD_ROLES = ["professor", "moderator"];
 
   function extensionOf(name) {
     var dot = name.lastIndexOf(".");
@@ -74,6 +75,7 @@
   var comingSoonEl = document.getElementById("comingSoon");
   var unitNameEl = document.getElementById("unitName");
   var backLink = document.getElementById("backLink");
+  var addBtn = document.getElementById("addNote");
 
   var unitId = qs("unitId") || "";
   var unitName = qs("unitName") || "Unit";
@@ -85,6 +87,25 @@
 
   backLink.href = "/html/unit.html?subjectName=" + encodeURIComponent(subjectName) +
                   "&subjectKey=" + encodeURIComponent(subjectKey);
+
+  function setupAddButton(user) {
+    db.ref("users").child(user.uid).once("value").then(function (snap) {
+      var u = snap.val() || {};
+      var role = String(u.role || "").trim().toLowerCase();
+      var assigned = String(u.assignedSubject || "").trim();
+      if (ADD_ROLES.indexOf(role) === -1 || !assigned) return;
+      if (sanitizeKey(assigned).toLowerCase() !== String(subjectKey).toLowerCase()) return;
+      addBtn.href = "/html/add-notes.html?unitId=" + encodeURIComponent(unitId) +
+                    "&unitName=" + encodeURIComponent(unitName) +
+                    "&subjectName=" + encodeURIComponent(subjectName || assigned) +
+                    "&subjectKey=" + encodeURIComponent(subjectKey);
+      addBtn.hidden = false;
+    }).catch(function () {});
+  }
+
+  auth.onAuthStateChanged(function (user) {
+    if (user && unitId) setupAddButton(user);
+  });
 
   function renderPhotoCollage(container, photos, noteId, noteTitle) {
     if (!photos || photos.length === 0) return;

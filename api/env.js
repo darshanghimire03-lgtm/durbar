@@ -65,6 +65,13 @@ function readEnv() {
   };
 }
 
+function readCloudinary() {
+  return {
+    cloudName: String(process.env.CLOUDINARY_CLOUD_NAME || "").trim(),
+    uploadPreset: String(process.env.CLOUDINARY_UPLOAD_PRESET || "").trim()
+  };
+}
+
 module.exports = function handler(req, res) {
   const env = readEnv();
   res.setHeader("Content-Type", "application/javascript; charset=utf-8");
@@ -83,7 +90,8 @@ module.exports = function handler(req, res) {
   res.setHeader("Cache-Control", "public, max-age=300, s-maxage=300");
 
   const json = JSON.stringify(env).replace(/</g, "\\u003c");
-  let out = "window.APP_ENV=" + json + ";";
+  const cloudJson = JSON.stringify(readCloudinary()).replace(/</g, "\\u003c");
+  let out = "window.APP_ENV=" + json + ";window.CLOUDINARY_ENV=" + cloudJson + ";";
   if (String((req.query && req.query.bundle) || "") === "1") {
     out += "\n" + BUNDLE;
   }
