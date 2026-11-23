@@ -93,6 +93,25 @@ function str(value) {
   return typeof value === "string" ? value : "";
 }
 
+function photoList(raw, single) {
+  let list = [];
+  if (Array.isArray(raw)) {
+    list = raw;
+  } else if (raw && typeof raw === "object") {
+    list = Object.keys(raw)
+      .sort(function (a, b) { return Number(a) - Number(b); })
+      .map(function (k) { return raw[k]; });
+  }
+  list = list.filter(function (u) { return typeof u === "string" && /^https?:\/\//i.test(u); });
+  if (!list.length && typeof single === "string" && /^https?:\/\//i.test(single)) list = [single];
+  return list;
+}
+
+function isPublicPrivacy(raw) {
+  const value = String(raw == null || raw === "" ? "everyone" : raw).trim().toLowerCase();
+  return value === "everyone";
+}
+
 async function loadPost(id) {
   const key = encodeURIComponent(id);
   const results = await Promise.all([
@@ -100,16 +119,19 @@ async function loadPost(id) {
     loadValue("posts/" + key + "/text"),
     loadValue("posts/" + key + "/imageUrl"),
     loadValue("posts/" + key + "/authorRole"),
-    loadValue("posts/" + key + "/createdAt")
+    loadValue("posts/" + key + "/createdAt"),
+    loadValue("posts/" + key + "/photos"),
+    loadValue("posts/" + key + "/privacy")
   ]);
 
   const authorUid = str(results[0]);
   const text = str(results[1]);
-  const imageUrl = str(results[2]);
+  const photos = photoList(results[5], results[2]);
   const authorRole = str(results[3]);
   const createdAt = typeof results[4] === "number" ? results[4] : 0;
+  const restricted = !isPublicPrivacy(results[6]);
 
-  if (!authorUid && !text && !imageUrl) return null;
+  if (!authorUid && !text && !photos.length) return null;
 
   let authorName = "";
   let authorPhoto = "";
@@ -131,8 +153,10 @@ async function loadPost(id) {
     authorName: authorName,
     authorPhoto: authorPhoto,
     authorRole: role,
-    text: text,
-    imageUrl: imageUrl,
+    text: restricted ? "" : text,
+    imageUrl: restricted ? "" : (photos[0] || ""),
+    photoCount: restricted ? 0 : photos.length,
+    restricted: restricted,
     createdAt: createdAt
   };
 }
@@ -237,7 +261,12 @@ function renderPost(site, id, post) {
   const hasImage = !!rawImage;
   const image = hasImage ? postPreviewImage(rawImage, rawPhoto) : (photoSmall || defaultImage);
   const title = post ? possessive(name) + " post on Durbar" : "Post on Durbar";
-  const description = body || (post ? (hasImage ? "Shared a photo on Durbar" : "Shared a post on Durbar") : "Open this post in the Durbar app");
+  const photoCount = post ? post.photoCount : 0;
+  const restricted = !!(post && post.restricted);
+  const description = body ||
+    (restricted ? "Open this post in the Durbar app" :
+    post ? (photoCount > 1 ? "Shared " + photoCount + " photos on Durbar" : hasImage ? "Shared a photo on Durbar" : "Shared a post on Durbar") :
+    "Open this post in the Durbar app");
 
   const avatar = photoPage
     ? '<img class="avatar" src="' + esc(photoPage) + '" alt="">'
@@ -246,7 +275,9 @@ function renderPost(site, id, post) {
   const html =
     '<div class="card">' +
     (postImagePage ? '<img class="media" src="' + esc(postImagePage) + '" alt="">' : "") +
+    (photoCount > 1 ? '<div class="tag">' + photoCount + " photos</div>" : "") +
     (body ? '<p class="text">' + esc(body) + "</p>" : "") +
+    (restricted ? '<p class="text">This post is shared with a specific group on Durbar.</p>' : "") +
     '<div class="head">' + avatar +
     '<div><div class="name">' + esc(name) + "</div>" +
     (role ? '<div class="role">' + esc(role) + "</div>" : "") +
