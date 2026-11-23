@@ -221,7 +221,8 @@ function renderPost(site, id, post) {
   const rawImage = post && post.imageUrl ? post.imageUrl : "";
   const postImagePage = rawImage ? cloudinaryImage(rawImage, "w_1200,h_630,c_fill,q_auto,f_jpg") : "";
   const hasImage = !!rawImage;
-  const image = hasImage ? postPreviewImage(rawImage) : "";
+  const cardImage = !hasImage && body ? site + "/api/og?id=" + encodeURIComponent(id) : "";
+  const image = hasImage ? postPreviewImage(rawImage) : cardImage;
   const title = post ? possessive(name) + " post on Durbar" : "Post on Durbar";
   const photoCount = post ? post.photoCount : 0;
   const restricted = !!(post && post.restricted);
@@ -250,7 +251,7 @@ function renderPost(site, id, post) {
     imageHeight: 630,
     pageUrl: pageUrl,
     type: "article",
-    twitterCard: hasImage ? "summary_large_image" : "summary"
+    twitterCard: image ? "summary_large_image" : "summary"
   }), html, target);
 }
 
