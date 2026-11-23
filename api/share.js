@@ -170,12 +170,13 @@ const baseStyle =
 
 function metaTags(opts) {
   const hasImage = !!opts.image;
-  return '<meta name="description" content="' + esc(opts.description) + '">' +
+  const hasDescription = !!opts.description;
+  return (hasDescription ? '<meta name="description" content="' + esc(opts.description) + '">' : "") +
     '<meta property="og:site_name" content="Durbar">' +
     '<meta property="og:type" content="' + opts.type + '">' +
     '<meta property="og:url" content="' + esc(opts.pageUrl) + '">' +
     '<meta property="og:title" content="' + esc(opts.title) + '">' +
-    '<meta property="og:description" content="' + esc(opts.description) + '">' +
+    (hasDescription ? '<meta property="og:description" content="' + esc(opts.description) + '">' : "") +
     (hasImage
       ? '<meta property="og:image" content="' + esc(opts.image) + '">' +
         '<meta property="og:image:width" content="' + opts.imageWidth + '">' +
@@ -184,7 +185,7 @@ function metaTags(opts) {
       : "") +
     '<meta name="twitter:card" content="' + opts.twitterCard + '">' +
     '<meta name="twitter:title" content="' + esc(opts.title) + '">' +
-    '<meta name="twitter:description" content="' + esc(opts.description) + '">' +
+    (hasDescription ? '<meta name="twitter:description" content="' + esc(opts.description) + '">' : "") +
     (hasImage ? '<meta name="twitter:image" content="' + esc(opts.image) + '">' : "");
 }
 
@@ -226,10 +227,10 @@ function renderPost(site, id, post) {
   const title = post ? possessive(name) + " post on Durbar" : "Post on Durbar";
   const photoCount = post ? post.photoCount : 0;
   const restricted = !!(post && post.restricted);
-  const description = body ||
+  const description = cardImage ? "" : (body ||
     (restricted ? "Open this post in the Durbar app" :
     post ? (photoCount > 1 ? "Shared " + photoCount + " photos on Durbar" : hasImage ? "Shared a photo on Durbar" : "Shared a post on Durbar") :
-    "Open this post in the Durbar app");
+    "Open this post in the Durbar app"));
 
   const html =
     '<div class="card">' +
