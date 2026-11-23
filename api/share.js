@@ -36,42 +36,9 @@ function videoThumbnail(videoUrl) {
     .replace(/\.[a-zA-Z0-9]{2,4}(\?.*)?$/, ".jpg");
 }
 
-function cloudinaryPublicId(url) {
-  const match = /^https?:\/\/res\.cloudinary\.com\/([^/]+)\/image\/upload\/(.+)$/.exec(url || "");
-  if (!match) return null;
-  const parts = match[2].split("?")[0].split("/");
-  while (parts.length > 1 && (/^v\d+$/.test(parts[0]) || /^[a-z]{1,3}_[^/]*$/.test(parts[0]))) parts.shift();
-  const publicId = parts.join("/").replace(/\.[a-zA-Z0-9]{2,4}$/, "");
-  return publicId ? { cloud: match[1], publicId: publicId } : null;
-}
-
-function base64Url(text) {
-  return Buffer.from(text, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function postPreviewImage(postImage, avatar) {
+function postPreviewImage(postImage) {
   if (!postImage) return "";
-  const base = cloudinaryPublicId(postImage);
-  if (!base) return postImage;
-  const marker = "/image/upload/";
-  const head = postImage.slice(0, postImage.indexOf(marker) + marker.length);
-  const rest = postImage.slice(postImage.indexOf(marker) + marker.length);
-  const original = rest.split("?")[0];
-  const frame = "w_1200,h_630,c_fill,g_auto,q_auto";
-
-  if (!avatar) return head + frame + ",f_jpg/" + original;
-
-  const av = cloudinaryPublicId(avatar);
-  let layer;
-  if (av && av.cloud === base.cloud) {
-    layer = "l_" + av.publicId.split("/").map(encodeURIComponent).join(":");
-  } else {
-    layer = "l_fetch:" + base64Url(avatar);
-  }
-
-  return head + frame + "/" +
-    layer + "/c_fill,g_face,w_132,h_132/r_max/bo_6px_solid_white/" +
-    "fl_layer_apply,g_south_west,x_32,y_32/f_jpg/" + original;
+  return cloudinaryImage(postImage, "w_1200,h_630,c_fill,g_auto,q_auto,f_jpg");
 }
 
 async function loadValue(path) {
@@ -134,24 +101,20 @@ async function loadPost(id) {
   if (!authorUid && !text && !photos.length) return null;
 
   let authorName = "";
-  let authorPhoto = "";
   let role = authorRole;
 
   if (authorUid && /^[A-Za-z0-9_-]{1,128}$/.test(authorUid)) {
     const uKey = encodeURIComponent(authorUid);
     const user = await Promise.all([
       loadValue("users/" + uKey + "/fullName"),
-      loadValue("users/" + uKey + "/profileImageUrl"),
       loadValue("users/" + uKey + "/role")
     ]);
     authorName = str(user[0]);
-    authorPhoto = str(user[1]);
-    if (!role) role = str(user[2]);
+    if (!role) role = str(user[1]);
   }
 
   return {
     authorName: authorName,
-    authorPhoto: authorPhoto,
     authorRole: role,
     text: restricted ? "" : text,
     imageUrl: restricted ? "" : (photos[0] || ""),
@@ -206,20 +169,23 @@ const baseStyle =
   ".badge{width:24px;height:24px;flex-shrink:0}";
 
 function metaTags(opts) {
+  const hasImage = !!opts.image;
   return '<meta name="description" content="' + esc(opts.description) + '">' +
     '<meta property="og:site_name" content="Durbar">' +
     '<meta property="og:type" content="' + opts.type + '">' +
     '<meta property="og:url" content="' + esc(opts.pageUrl) + '">' +
     '<meta property="og:title" content="' + esc(opts.title) + '">' +
     '<meta property="og:description" content="' + esc(opts.description) + '">' +
-    '<meta property="og:image" content="' + esc(opts.image) + '">' +
-    '<meta property="og:image:width" content="' + opts.imageWidth + '">' +
-    '<meta property="og:image:height" content="' + opts.imageHeight + '">' +
-    '<meta property="og:image:alt" content="' + esc(opts.title) + '">' +
+    (hasImage
+      ? '<meta property="og:image" content="' + esc(opts.image) + '">' +
+        '<meta property="og:image:width" content="' + opts.imageWidth + '">' +
+        '<meta property="og:image:height" content="' + opts.imageHeight + '">' +
+        '<meta property="og:image:alt" content="' + esc(opts.title) + '">'
+      : "") +
     '<meta name="twitter:card" content="' + opts.twitterCard + '">' +
     '<meta name="twitter:title" content="' + esc(opts.title) + '">' +
     '<meta name="twitter:description" content="' + esc(opts.description) + '">' +
-    '<meta name="twitter:image" content="' + esc(opts.image) + '">';
+    (hasImage ? '<meta name="twitter:image" content="' + esc(opts.image) + '">' : "");
 }
 
 function wrapPage(site, title, meta, bodyHtml, redirectTo) {
@@ -247,19 +213,15 @@ function possessive(name) {
 }
 
 function renderPost(site, id, post) {
-  const defaultImage = site + "/favicon.png";
   const pageUrl = site + "/post/" + id;
   const target = id === "invalid" ? "/" : "/layout/comment.html?postId=" + encodeURIComponent(id);
   const name = post && post.authorName ? post.authorName : "Durbar User";
   const role = post && post.authorRole ? post.authorRole : "";
   const body = post ? shorten(post.text, 300) : "";
-  const rawPhoto = post && post.authorPhoto ? post.authorPhoto : "";
   const rawImage = post && post.imageUrl ? post.imageUrl : "";
-  const photoPage = rawPhoto ? cloudinaryImage(rawPhoto, "w_200,h_200,c_fill,g_face,q_auto,f_jpg") : "";
-  const photoSmall = rawPhoto ? circleImage(rawPhoto, 200) : "";
   const postImagePage = rawImage ? cloudinaryImage(rawImage, "w_1200,h_630,c_fill,q_auto,f_jpg") : "";
   const hasImage = !!rawImage;
-  const image = hasImage ? postPreviewImage(rawImage, rawPhoto) : (photoSmall || defaultImage);
+  const image = hasImage ? postPreviewImage(rawImage) : "";
   const title = post ? possessive(name) + " post on Durbar" : "Post on Durbar";
   const photoCount = post ? post.photoCount : 0;
   const restricted = !!(post && post.restricted);
@@ -268,20 +230,15 @@ function renderPost(site, id, post) {
     post ? (photoCount > 1 ? "Shared " + photoCount + " photos on Durbar" : hasImage ? "Shared a photo on Durbar" : "Shared a post on Durbar") :
     "Open this post in the Durbar app");
 
-  const avatar = photoPage
-    ? '<img class="avatar" src="' + esc(photoPage) + '" alt="">'
-    : '<div class="avatar fallback">' + esc(name.charAt(0).toUpperCase()) + "</div>";
-
   const html =
     '<div class="card">' +
-    (postImagePage ? '<img class="media" src="' + esc(postImagePage) + '" alt="">' : "") +
-    (photoCount > 1 ? '<div class="tag">' + photoCount + " photos</div>" : "") +
-    (body ? '<p class="text">' + esc(body) + "</p>" : "") +
-    (restricted ? '<p class="text">This post is shared with a specific group on Durbar.</p>' : "") +
-    '<div class="head">' + avatar +
-    '<div><div class="name">' + esc(name) + "</div>" +
+    '<div class="head"><div><div class="name">' + esc(name) + "</div>" +
     (role ? '<div class="role">' + esc(role) + "</div>" : "") +
     "</div></div>" +
+    (body ? '<p class="text">' + esc(body) + "</p>" : "") +
+    (postImagePage ? '<img class="media" src="' + esc(postImagePage) + '" alt="">' : "") +
+    (photoCount > 1 ? '<div class="tag">' + photoCount + " photos</div>" : "") +
+    (restricted ? '<p class="text">This post is shared with a specific group on Durbar.</p>' : "") +
     '<a class="btn" href="' + esc(target) + '">View post</a>' +
     '<div class="brand">Durbar Learning Platform</div></div>';
 
@@ -289,8 +246,8 @@ function renderPost(site, id, post) {
     title: title,
     description: description,
     image: image,
-    imageWidth: hasImage ? 1200 : 200,
-    imageHeight: hasImage ? 630 : 200,
+    imageWidth: 1200,
+    imageHeight: 630,
     pageUrl: pageUrl,
     type: "article",
     twitterCard: hasImage ? "summary_large_image" : "summary"
