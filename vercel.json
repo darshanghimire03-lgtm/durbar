@@ -13,6 +13,8 @@
     { "source": "/profile/index.html", "destination": "/html/profile.html", "permanent": true }
   ],
   "rewrites": [
+    { "source": "/me", "destination": "/api/me" },
+    { "source": "/me/", "destination": "/api/me" },
     { "source": "/login", "destination": "/index.html" },
     { "source": "/login/", "destination": "/index.html" },
     { "source": "/signup/prof/:token", "destination": "/index.html" },

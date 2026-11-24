@@ -12,6 +12,31 @@ const SUBJECTS = ["Economic", "Account", "Computer Science", "English", "Nepali"
 
 const IS_AUTH_PAGE = /^\/((index(\.html)?)|login\/?|signup\/?|signup\/prof\/[A-Za-z0-9]+\/?)?$/.test(location.pathname) || /(^|\/)reset-password(\/(index\.html)?)?$/.test(location.pathname);
 
+function clearDomainSession() {
+  return fetch("/api/session", { method: "DELETE", credentials: "same-origin" }).catch(function () {});
+}
+
+function saveDomainSession(refreshToken) {
+  return fetch("/api/session", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshToken: refreshToken })
+  }).catch(function () {});
+}
+
+var lastSavedToken = "";
+auth.onAuthStateChanged(function (user) {
+  if (!user) {
+    lastSavedToken = "";
+    clearDomainSession();
+    return;
+  }
+  if (user.refreshToken === lastSavedToken) return;
+  lastSavedToken = user.refreshToken;
+  saveDomainSession(user.refreshToken);
+});
+
 if (!IS_AUTH_PAGE) {
   document.documentElement.style.visibility = "hidden";
   auth.onAuthStateChanged(function (user) {
@@ -25,7 +50,9 @@ if (!IS_AUTH_PAGE) {
 }
 
 function logout() {
-  return auth.signOut().then(function () {
+  return clearDomainSession().then(function () {
+    return auth.signOut();
+  }).then(function () {
     location.replace("/");
   });
 }
