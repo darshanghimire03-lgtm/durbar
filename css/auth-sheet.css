@@ -154,4 +154,32 @@
 .as-foot strong { color: #3d7be4; font-weight: 700; }
 
 @media (min-width: 600px) {
-  .as-overlay { ali
+  .as-overlay { align-items: center; }
+  .as-sheet { border-radius: 28px; max-height: 90vh; padding-bottom: 26px; }
+  .as-handle { display: none; }
+}
+
+/* Continue as <name> */
+.as-continue { display: flex; flex-direction: column; gap: 14px; }
+.as-account {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border: 2px solid #d6e2f5; border-radius: 18px; background: #fff;
+}
+.as-avatar {
+  width: 52px; height: 52px; flex-shrink: 0; border-radius: 50%;
+  background: #e6eefc; color: #1f4aa8; font-weight: 700; font-size: 1.3rem;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.as-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.as-account-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.as-account-name {
+  font-weight: 700; font-size: 1.02rem; color: #0c1f4a;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.as-account-email {
+  font-size: 0.85rem; color: #6b7a99;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.as-continue .as-submit { padding: 0 22px; }
+.as-continue-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.as-signout:disabled { opacity: 0.5; cursor: default; }

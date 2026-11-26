@@ -11,6 +11,23 @@
       <div class="as-error" id="asError" role="alert" aria-live="assertive"></div>
       <div class="as-info" id="asInfo" role="status" aria-live="polite"></div>
 
+      <div class="as-continue" id="asContinue" hidden>
+        <div class="as-account">
+          <span class="as-avatar" id="asAvatar" aria-hidden="true"></span>
+          <span class="as-account-text">
+            <span class="as-account-name" id="asAccountName"></span>
+            <span class="as-account-email" id="asAccountEmail"></span>
+          </span>
+        </div>
+
+        <button type="button" class="as-submit" id="asContinueBtn">
+          <span class="as-spinner as-spinner-light" aria-hidden="true"></span>
+          <span class="as-continue-label" id="asContinueLabel">Continue</span>
+        </button>
+
+        <button type="button" class="as-link as-signout" id="asAnotherBtn">Use another account</button>
+      </div>
+
       <form class="as-email-form" id="asSigninForm" novalidate>
         <label class="as-field">
           <span class="as-label">Email</span>

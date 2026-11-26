@@ -1,6 +1,7 @@
 (function () {
   var SHEET_URL = "/html/auth-sheet.html";
   var SETUP_URL = "/account-setup/";
+  var ME_URL = "/api/me";
 
   var overlay = null;
   var overlayPromise = null;
@@ -12,9 +13,107 @@
   var signingUp = false;
   var redirectChecked = false;
   var retryTimer = null;
+  var sessionPromise = null;
   var nextUrl = readNext();
   var profToken = readProfToken();
   var inviteOk = false;
+  var restoreFailed = readRestoreFlag();
+
+  function readRestoreFlag() {
+    try {
+      var v = sessionStorage.getItem("durbar_restore") === "1";
+      sessionStorage.removeItem("durbar_restore");
+      return v;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function persistSession(data) {
+    var apiKey = firebase.app().options.apiKey;
+    var acc = data.account || {};
+    var now = String(Date.now());
+    var user = {
+      uid: data.uid,
+      email: acc.email || null,
+      emailVerified: !!acc.emailVerified,
+      displayName: acc.displayName || null,
+      isAnonymous: false,
+      photoURL: acc.photoUrl || null,
+      phoneNumber: acc.phoneNumber || null,
+      tenantId: null,
+      providerData: (acc.providers || []).map(function (p) {
+        return {
+          uid: p.rawId || p.email || data.uid,
+          displayName: p.displayName || null,
+          email: p.email || null,
+          phoneNumber: p.phoneNumber || null,
+          photoURL: p.photoUrl || null,
+          providerId: p.providerId
+        };
+      }),
+      stsTokenManager: {
+        refreshToken: data.refreshToken,
+        accessToken: data.idToken,
+        expirationTime: Date.now() + (Number(data.expiresIn) || 3600) * 1000
+      },
+      createdAt: String(acc.createdAt || now),
+      lastLoginAt: String(acc.lastLoginAt || now),
+      apiKey: apiKey,
+      appName: "[DEFAULT]"
+    };
+    var key = "firebase:authUser:" + apiKey + ":[DEFAULT]";
+
+    return new Promise(function (resolve, reject) {
+      if (!window.indexedDB) {
+        try {
+          localStorage.setItem(key, JSON.stringify(user));
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+        return;
+      }
+      var req = indexedDB.open("firebaseLocalStorageDb", 1);
+      req.onupgradeneeded = function () {
+        var d = req.result;
+        if (!d.objectStoreNames.contains("firebaseLocalStorage")) {
+          d.createObjectStore("firebaseLocalStorage", { keyPath: "fbase_key" });
+        }
+      };
+      req.onerror = function () { reject(req.error); };
+      req.onsuccess = function () {
+        var idb = req.result;
+        var tx = idb.transaction("firebaseLocalStorage", "readwrite");
+        tx.objectStore("firebaseLocalStorage").put({ fbase_key: key, value: user });
+        tx.oncomplete = function () { idb.close(); resolve(); };
+        tx.onerror = tx.onabort = function () { reject(tx.error); };
+      };
+    });
+  }
+
+  function checkWebsiteSession() {
+    if (profToken || /^\/signup\/?$/.test(location.pathname)) return Promise.resolve(null);
+    if (!sessionPromise) {
+      sessionPromise = fetch(ME_URL, {
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: { Accept: "application/json" }
+      }).then(function (res) {
+        return res.ok ? res.json() : null;
+      }).then(function (d) {
+        if (!d || !d.loggedIn) return null;
+        return {
+          name: typeof d.name === "string" ? d.name : "",
+          email: typeof d.email === "string" ? d.email : "",
+          photo: typeof d.photo === "string" ? d.photo : ""
+        };
+      }).catch(function () {
+        return null;
+      });
+    }
+    return sessionPromise;
+  }
 
   function readNext() {
     var raw = new URLSearchParams(location.search).get("next") || "";
@@ -162,6 +261,14 @@
     var titleEl = $("#asTitle");
     var descEl = $("#asDesc");
 
+    var continueBox = $("#asContinue");
+    var avatarEl = $("#asAvatar");
+    var accountName = $("#asAccountName");
+    var accountEmail = $("#asAccountEmail");
+    var continueBtn = $("#asContinueBtn");
+    var continueLabel = $("#asContinueLabel");
+    var anotherBtn = $("#asAnotherBtn");
+
     var signinForm = $("#asSigninForm");
     var signinEmail = $("#asEmail");
     var signinPass = $("#asPassword");
@@ -183,6 +290,9 @@
     var switchBtn = $("#asSwitchBtn");
 
     var mode = profToken || /^\/signup\/?$/.test(location.pathname) ? "signup" : "signin";
+    var continueMode = false;
+    var continueText = "Continue";
+    var continueEmail = "";
 
     function showError(message) {
       infoBox.classList.remove("visible");
@@ -208,16 +318,46 @@
       googleBtn.disabled = isBusy;
       signinBtn.disabled = isBusy;
       signupBtn.disabled = isBusy || (!!profToken && !inviteOk);
+      continueBtn.disabled = isBusy;
+      anotherBtn.disabled = isBusy;
       googleBtn.classList.toggle("loading", isBusy && which === "google");
       signinBtn.classList.toggle("loading", isBusy && which === "signin");
       signupBtn.classList.toggle("loading", isBusy && which === "signup");
+      continueBtn.classList.toggle("loading", isBusy && which === "continue");
       googleLabel.textContent = isBusy && which === "google" ? "Signing in..." : "Continue with Google";
       signinLabel.textContent = isBusy && which === "signin" ? "Signing in..." : "Sign in";
       signupLabel.textContent = isBusy && which === "signup" ? "Creating account..." : "Create account";
+      continueLabel.textContent = isBusy && which === "continue" ? "Signing in..." : continueText;
+    }
+
+    function paintAvatar(info) {
+      avatarEl.textContent = (info.name || info.email || "?").trim().charAt(0).toUpperCase();
+      if (!/^https:\/\//i.test(info.photo || "")) return;
+      var img = new Image();
+      img.alt = "";
+      img.referrerPolicy = "no-referrer";
+      img.onload = function () {
+        avatarEl.textContent = "";
+        avatarEl.appendChild(img);
+      };
+      img.src = info.photo;
     }
 
     function render() {
       var signin = mode === "signin";
+
+      if (continueMode && !profToken) {
+        continueBox.hidden = false;
+        signinForm.hidden = true;
+        signupForm.hidden = true;
+        googleBlock.hidden = true;
+        switchRow.hidden = true;
+        titleEl.textContent = "Welcome back";
+        descEl.textContent = "Continue with your Durbar account";
+        return;
+      }
+
+      continueBox.hidden = true;
       signinForm.hidden = !signin;
       signupForm.hidden = signin;
       if (profToken) {
@@ -246,6 +386,54 @@
       setBusy(false);
       showError(messageFor(err && err.code));
     }
+
+    function leaveContinue(message) {
+      sessionPromise = Promise.resolve(null);
+      continueMode = false;
+      clearMessages();
+      render();
+      syncUrl(mode);
+      if (continueEmail) signinEmail.value = continueEmail;
+      if (message) showError(message);
+      signinEmail.focus({ preventScroll: true });
+    }
+
+    continueBtn.addEventListener("click", function () {
+      if (busy) return;
+      clearMessages();
+      setBusy(true, "continue");
+
+      fetch(ME_URL, {
+        method: "POST",
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: { Accept: "application/json" }
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (d) {
+          if (!res.ok || !d.uid || !d.idToken || !d.refreshToken) {
+            throw new Error(d.error || "restore_failed");
+          }
+          return d;
+        });
+      }).then(function (data) {
+        return persistSession(data);
+      }).then(function () {
+        try { sessionStorage.setItem("durbar_restore", "1"); } catch (e) {}
+        location.reload();
+      }).catch(function (err) {
+        setBusy(false);
+        if (err instanceof TypeError) {
+          showError(messageFor("auth/network-request-failed"));
+          return;
+        }
+        leaveContinue("Please sign in again to continue.");
+      });
+    });
+
+    anotherBtn.addEventListener("click", function () {
+      if (busy) return;
+      leaveContinue("");
+    });
 
     signinForm.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -340,7 +528,7 @@
     if (!redirectChecked) {
       redirectChecked = true;
       auth.getRedirectResult().catch(function (err) {
-        show();
+        show({ form: true });
         handleError(err);
       });
     }
@@ -362,11 +550,27 @@
 
     ui = {
       setBusy: setBusy,
+      showError: showError,
+      setContinue: function (info) {
+        continueMode = !!info && !profToken;
+        if (continueMode) {
+          var label = info.name || info.email || "Durbar user";
+          continueEmail = info.email || "";
+          accountName.textContent = label;
+          accountEmail.textContent = continueEmail;
+          accountEmail.hidden = !continueEmail;
+          continueText = "Continue as " + label;
+          continueLabel.textContent = continueText;
+          paintAvatar(info);
+        }
+        render();
+      },
       sync: function () {
-        syncUrl(mode);
+        if (!continueMode) syncUrl(mode);
       },
       reset: function () {
-        mode = profToken ? "signup" : "signin";
+        mode = profToken || /^\/signup\/?$/.test(location.pathname) ? "signup" : "signin";
+        continueMode = false;
         clearMessages();
         setBusy(false);
         render();
@@ -395,12 +599,20 @@
     return overlayPromise;
   }
 
-  function show() {
-    build().then(function (el) {
-      if (auth.currentUser) return;
-      el.hidden = false;
-      document.body.style.overflow = "hidden";
-      if (ui) ui.sync();
+  function show(opts) {
+    var wantForm = !!(opts && opts.form) || restoreFailed;
+    checkWebsiteSession().then(function (info) {
+      return build().then(function (el) {
+        if (auth.currentUser) return;
+        if (ui) ui.setContinue(wantForm ? null : info);
+        if (restoreFailed && ui) {
+          restoreFailed = false;
+          ui.showError("Couldn't continue automatically. Please sign in.");
+        }
+        el.hidden = false;
+        document.body.style.overflow = "hidden";
+        if (ui) ui.sync();
+      });
     }).catch(function () {
       clearTimeout(retryTimer);
       retryTimer = setTimeout(show, 2000);

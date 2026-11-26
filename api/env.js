@@ -29,7 +29,6 @@ var lastSavedToken = "";
 auth.onAuthStateChanged(function (user) {
   if (!user) {
     lastSavedToken = "";
-    clearDomainSession();
     return;
   }
   if (user.refreshToken === lastSavedToken) return;

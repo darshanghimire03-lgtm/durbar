@@ -47,7 +47,12 @@ async function exchange(refreshToken) {
   if (!r.ok) return null;
   const d = await r.json();
   if (!d.id_token || !d.refresh_token) return null;
-  return { idToken: d.id_token, refreshToken: d.refresh_token, uid: d.user_id };
+  return {
+    idToken: d.id_token,
+    refreshToken: d.refresh_token,
+    uid: d.user_id,
+    expiresIn: Number(d.expires_in) || 3600
+  };
 }
 
 async function lookup(idToken) {
@@ -64,10 +69,47 @@ async function lookup(idToken) {
   return (d.users && d.users[0]) || null;
 }
 
+async function loadProfile(session) {
+  let name = "";
+  let photo = "";
+  let email = "";
+
+  try {
+    const acc = await lookup(session.idToken);
+    if (acc) {
+      name = acc.displayName || "";
+      photo = acc.photoUrl || "";
+      email = acc.email || "";
+    }
+  } catch (e) {}
+
+  const base = String(process.env.FIREBASE_DATABASE_URL || "").replace(/\/+$/, "");
+  if (base) {
+    try {
+      const r = await fetch(
+        base + "/users/" + encodeURIComponent(session.uid) + ".json?auth=" + encodeURIComponent(session.idToken)
+      );
+      if (r.ok) {
+        const u = await r.json();
+        if (u) {
+          if (typeof u.fullName === "string" && u.fullName.trim()) name = u.fullName.trim();
+          if (typeof u.profileImageUrl === "string" && u.profileImageUrl) photo = u.profileImageUrl;
+          if (!email && typeof u.email === "string") email = u.email;
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (!name && email) name = email.split("@")[0];
+  if (!/^https:\/\//i.test(photo)) photo = "";
+  return { name: name, email: email, photo: photo };
+}
+
 module.exports = {
   MAX_AGE: MAX_AGE,
   setCookie: setCookie,
   readCookie: readCookie,
   exchange: exchange,
-  lookup: lookup
+  lookup: lookup,
+  loadProfile: loadProfile
 };

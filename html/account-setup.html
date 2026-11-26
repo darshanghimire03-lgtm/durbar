@@ -572,9 +572,7 @@ form { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
 
   signOutBtn.addEventListener("click", function () {
     if (busy) return;
-    auth.signOut().then(function () {
-      location.replace("/");
-    });
+    logout();
   });
 
   function start(user) {
