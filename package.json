@@ -1,7 +1,10 @@
+
 {
   "name": "durbar",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@vercel/og": "^0.6.8"
+    "@vercel/og": "^0.6.8",
+    "firebase-admin": "^13.0.0"
   }
 }
