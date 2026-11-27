@@ -12,6 +12,18 @@ const SECTIONS = ["A", "B"];
 const SAFE_KEY = /^[^\/.#$\[\]]+$/;
 const UPDATE_ALLOWED_EMAIL = (process.env.PUSH_UPDATE_EMAIL || "darshanghimire03@gmail.com").toLowerCase();
 
+const EVENT_TYPES = {
+  test: "Test",
+  exam: "Exam",
+  school_event: "School Event",
+  vacation: "Vacation",
+};
+const EVENT_EDITOR_ROLES = ["professor", "captain"];
+const NEPALI_MONTHS = [
+  "Baisakh", "Jestha", "Asadh", "Shrawan", "Bhadra", "Ashwin",
+  "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra",
+];
+
 function parseSections(raw) {
   const text = String(raw || "").trim().toUpperCase();
   const matches = text.match(/(?<![A-Z])[A-Z](?![A-Z])/g) || [];
@@ -38,6 +50,20 @@ function send(topic, data) {
     data,
     android: { priority: "high" },
   });
+}
+
+function monthName(month) {
+  return NEPALI_MONTHS[Number(month) - 1] || "";
+}
+
+function formatClock(value) {
+  const parts = String(value || "").split(":");
+  const hour = parseInt(parts[0], 10);
+  const minute = parseInt(parts[1], 10);
+  if (isNaN(hour) || isNaN(minute)) return String(value || "");
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const twelve = hour % 12 === 0 ? 12 : hour % 12;
+  return twelve + ":" + String(minute).padStart(2, "0") + " " + suffix;
 }
 
 async function handlePost(uid, postId) {
@@ -134,8 +160,79 @@ async function handleUpdate(decoded) {
     versionName: String(update.versionName || ""),
     versionCode: String(update.versionCode || 0),
     whatsNew: String(update.whatsNew || ""),
+    downloadUrl: String(update.downloadUrl || ""),
   });
   return { status: 200, body: { sent: ["app_update"] } };
+}
+
+async function handleEvent(uid, year, month, eventType, eventId) {
+  if (!EVENT_TYPES[eventType]) return { status: 200, body: { skipped: "type" } };
+
+  const fs = admin.firestore();
+  const userSnap = await fs.collection("users").doc(uid).get();
+  const role = String((userSnap.exists && userSnap.get("role")) || "").trim().toLowerCase();
+  if (!EVENT_EDITOR_ROLES.includes(role)) {
+    return { status: 403, body: { error: "forbidden" } };
+  }
+
+  const snap = await fs.collection("calendar").doc(String(year)).get();
+  if (!snap.exists) return { status: 404, body: { error: "calendar not found" } };
+
+  const event = snap.get(new admin.firestore.FieldPath(String(month), eventType, eventId));
+  if (!event) return { status: 404, body: { error: "event not found" } };
+
+  if (!(await claim("events/" + year + "_" + month + "_" + eventType + "_" + eventId))) {
+    return { status: 200, body: { skipped: "duplicate" } };
+  }
+
+  let title = "";
+  let dateText = "";
+  let timeText = "";
+
+  if (eventType === "test") {
+    const subjects = Array.isArray(event.subjects) ? event.subjects.filter(Boolean) : [];
+    title = subjects.length ? subjects.join(" · ") + " Test" : "Test";
+    dateText = monthName(month) + " " + event.day + ", " + year;
+  } else if (eventType === "exam") {
+    const subject = String(event.subject || "");
+    title = subject ? subject + " Exam" : "Exam";
+    dateText = monthName(month) + " " + event.day + ", " + year;
+    if (event.startTime) {
+      timeText = formatClock(event.startTime) + (event.endTime ? " - " + formatClock(event.endTime) : "");
+    }
+  } else if (eventType === "school_event") {
+    title = String(event.title || "School Event");
+    dateText = monthName(month) + " " + event.day + ", " + year;
+  } else {
+    title = String(event.title || "Vacation");
+    const startMonth = Number(event.startMonth || month);
+    const endMonth = Number(event.endMonth || startMonth);
+    const startDay = event.startDay;
+    const endDay = event.endDay || startDay;
+    if (startMonth === endMonth && startDay === endDay) {
+      dateText = monthName(startMonth) + " " + startDay + ", " + year;
+    } else {
+      dateText = monthName(startMonth) + " " + startDay + " - " + monthName(endMonth) + " " + endDay + ", " + year;
+    }
+  }
+
+  let text = dateText;
+  if (timeText) text += " • " + timeText;
+  const description = String(event.description || "").trim();
+  if (description) {
+    text += " • " + (description.length > 80 ? description.substring(0, 77) + "..." : description);
+  }
+
+  await send("posts_all", {
+    type: "event",
+    eventType: String(eventType),
+    eventId: String(eventId),
+    heading: "New " + EVENT_TYPES[eventType],
+    title: String(title),
+    text: String(text),
+    photoUrl: String(event.photoUrl || ""),
+  });
+  return { status: 200, body: { sent: ["posts_all"] } };
 }
 
 module.exports = async (req, res) => {
@@ -175,6 +272,20 @@ module.exports = async (req, res) => {
       );
     } else if (body.type === "update") {
       result = await handleUpdate(decoded);
+    } else if (
+      body.type === "event" &&
+      /^\d{4}$/.test(String(body.year || "")) &&
+      /^(1[0-2]|[1-9])$/.test(String(body.month || "")) &&
+      SAFE_KEY.test(String(body.eventType || "")) &&
+      SAFE_KEY.test(String(body.eventId || ""))
+    ) {
+      result = await handleEvent(
+        decoded.uid,
+        String(body.year),
+        String(body.month),
+        String(body.eventType),
+        String(body.eventId)
+      );
     } else {
       result = { status: 400, body: { error: "bad request" } };
     }
