@@ -10,6 +10,7 @@ if (!admin.apps.length) {
 const WINDOW_MS = 15 * 60 * 1000;
 const SECTIONS = ["A", "B"];
 const SAFE_KEY = /^[^\/.#$\[\]]+$/;
+const UPDATE_ALLOWED_EMAIL = (process.env.PUSH_UPDATE_EMAIL || "darshanghimire03@gmail.com").toLowerCase();
 
 function parseSections(raw) {
   const text = String(raw || "").trim().toUpperCase();
@@ -23,10 +24,10 @@ function targetSections(privacy) {
   return parseSections(trimmed.substring("section".length));
 }
 
-async function claim(path) {
+async function claim(key) {
   const result = await admin
     .database()
-    .ref(path)
+    .ref("notified/" + key)
     .transaction((current) => (current ? undefined : true));
   return result.committed;
 }
@@ -40,18 +41,22 @@ function send(topic, data) {
 }
 
 async function handlePost(uid, postId) {
-  const db = admin.database();
-  const post = (await db.ref("posts/" + postId).get()).val();
-  if (!post) return { status: 404, body: { error: "not found" } };
+  const fs = admin.firestore();
+  const snap = await fs.collection("posts").doc(postId).get();
+  if (!snap.exists) return { status: 404, body: { error: "post not found" } };
+  const post = snap.data();
+
   if (post.authorUid !== uid) return { status: 403, body: { error: "forbidden" } };
   if (Date.now() - Number(post.createdAt || 0) > WINDOW_MS) {
     return { status: 200, body: { skipped: "old" } };
   }
-  if (!(await claim("notified/posts/" + postId))) {
+  if (!(await claim("posts/" + postId))) {
     return { status: 200, body: { skipped: "duplicate" } };
   }
 
-  const author = (await db.ref("users/" + uid).get()).val() || {};
+  const authorSnap = await fs.collection("users").doc(uid).get();
+  const author = authorSnap.exists ? authorSnap.data() : {};
+
   const data = {
     type: "post",
     postId: String(postId),
@@ -70,18 +75,30 @@ async function handlePost(uid, postId) {
     topics = sections.map((s) => "section_" + s);
   }
 
+  if (topics.length === 0) return { status: 200, body: { skipped: "no topics" } };
+
   await Promise.all(topics.map((topic) => send(topic, data)));
   return { status: 200, body: { sent: topics } };
 }
 
 async function handleNote(subjectKey, unitId, noteId) {
-  const path = "units/" + subjectKey + "/" + unitId + "/notes/" + noteId;
-  const note = (await admin.database().ref(path).get()).val();
-  if (!note) return { status: 404, body: { error: "not found" } };
+  const snap = await admin
+    .firestore()
+    .collection("units")
+    .doc(subjectKey)
+    .collection("unitItems")
+    .doc(unitId)
+    .get();
+  if (!snap.exists) return { status: 404, body: { error: "unit not found" } };
+
+  const notes = snap.get("notes") || {};
+  const note = notes[noteId];
+  if (!note) return { status: 404, body: { error: "note not found" } };
+
   if (Date.now() - Number(note.createdAt || 0) > WINDOW_MS) {
     return { status: 200, body: { skipped: "old" } };
   }
-  if (!(await claim("notified/notes/" + subjectKey + "_" + unitId + "_" + noteId))) {
+  if (!(await claim("notes/" + subjectKey + "_" + unitId + "_" + noteId))) {
     return { status: 200, body: { skipped: "duplicate" } };
   }
 
@@ -94,6 +111,33 @@ async function handleNote(subjectKey, unitId, noteId) {
   return { status: 200, body: { sent: ["notes"] } };
 }
 
+async function handleUpdate(decoded) {
+  const email = String(decoded.email || "").toLowerCase();
+  if (email !== UPDATE_ALLOWED_EMAIL) {
+    return { status: 403, body: { error: "forbidden" } };
+  }
+
+  const snap = await admin.database().ref("config/app_update").get();
+  const update = snap.val();
+  if (!update || !update.downloadUrl) {
+    return { status: 404, body: { error: "update not found" } };
+  }
+  if (Date.now() - Number(update.updatedAt || 0) > WINDOW_MS) {
+    return { status: 200, body: { skipped: "old" } };
+  }
+  if (!(await claim("updates/" + String(update.versionCode)))) {
+    return { status: 200, body: { skipped: "duplicate" } };
+  }
+
+  await send("app_update", {
+    type: "update",
+    versionName: String(update.versionName || ""),
+    versionCode: String(update.versionCode || 0),
+    whatsNew: String(update.whatsNew || ""),
+  });
+  return { status: 200, body: { sent: ["app_update"] } };
+}
+
 module.exports = async (req, res) => {
   if (req.method === "GET") {
     return res.status(200).json({ ok: true });
@@ -102,12 +146,17 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "method not allowed" });
   }
 
+  let decoded;
   try {
     const header = req.headers.authorization || "";
     const idToken = header.startsWith("Bearer ") ? header.slice(7) : "";
     if (!idToken) return res.status(401).json({ error: "missing token" });
+    decoded = await admin.auth().verifyIdToken(idToken);
+  } catch (e) {
+    return res.status(401).json({ error: "unauthorized" });
+  }
 
-    const decoded = await admin.auth().verifyIdToken(idToken);
+  try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
 
     let result;
@@ -124,12 +173,15 @@ module.exports = async (req, res) => {
         String(body.unitId),
         String(body.noteId)
       );
+    } else if (body.type === "update") {
+      result = await handleUpdate(decoded);
     } else {
       result = { status: 400, body: { error: "bad request" } };
     }
 
     return res.status(result.status).json(result.body);
   } catch (e) {
-    return res.status(401).json({ error: "unauthorized" });
+    console.error("notify error", e);
+    return res.status(500).json({ error: "server error", message: String(e && e.message) });
   }
 };
