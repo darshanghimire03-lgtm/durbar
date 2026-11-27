@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Durbar – Realtime Database → Firestore</title>
+<style>
+ body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:16px}
+ .card{max-width:760px;margin:0 auto 14px;background:#1e293b;border-radius:14px;padding:16px}
+ h1{font-size:20px;margin:0 0 4px} h2{font-size:15px;margin:0 0 8px;color:#93c5fd}
+ p{font-size:13px;color:#94a3b8;margin:4px 0}
+ label{display:block;font-size:12px;color:#94a3b8;margin:8px 0 3px}
+ input,select{width:100%;box-sizing:border-box;padding:9px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e2e8f0}
+ button{padding:11px 16px;border:0;border-radius:10px;font-weight:600;cursor:pointer;background:#3b82f6;color:#fff;margin-top:10px}
+ button:disabled{opacity:.4;cursor:not-allowed}
+ #move{background:#16a34a;width:100%;font-size:16px}
+ table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+ td,th{padding:6px;border-bottom:1px solid #334155;text-align:left}
+ #bar{height:10px;background:#334155;border-radius:6px;overflow:hidden;margin-top:10px}
+ #bar i{display:block;height:100%;width:0;background:#22c55e;transition:width .2s}
+ #log{font:12px/1.5 monospace;white-space:pre-wrap;max-height:220px;overflow:auto;background:#0f172a;padding:8px;border-radius:8px;margin-top:10px}
+ .ok{background:#052e16;border:1px solid #16a34a;color:#86efac;padding:14px;border-radius:12px;font-size:17px;font-weight:700;text-align:center;margin-top:10px}
+ .err{background:#450a0a;border:1px solid #dc2626;color:#fca5a5;padding:14px;border-radius:12px;font-weight:600;margin-top:10px}
+ .hide{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Durbar: Realtime Database → Firestore</h1>
+  <p>Copies your data into Firestore. Nothing is deleted from Realtime Database.</p>
+</div>
+
+<div class="card">
+  <h2>1. Project &amp; sign in</h2>
+  <label>API key</label><input id="apiKey" value="AIzaSyCyrQUpOlHrY3t7GtxFXD5zCweKtYYX5wI">
+  <label>Project ID</label><input id="projectId" value="darbarhigh-4c642">
+  <label>Realtime Database URL</label><input id="dbUrl" value="https://darbarhigh-4c642-default-rtdb.firebaseio.com">
+  <button id="signin">Sign in with Google</button>
+  <p id="who">Not signed in</p>
+</div>
+
+<div class="card">
+  <h2>2. Source</h2>
+  <select id="mode">
+    <option value="live">Read live from Realtime Database</option>
+    <option value="file">Use a JSON export file</option>
+  </select>
+  <div id="fileBox" class="hide"><label>RTDB export (.json)</label><input type="file" id="file" accept=".json"></div>
+  <button id="scan">Scan &amp; preview</button>
+  <table id="preview" class="hide"></table>
+</div>
+
+<div class="card">
+  <h2>3. Move</h2>
+  <button id="move" disabled>Move data to Firestore</button>
+  <div id="bar"><i></i></div>
+  <div id="ok" class="ok hide"></div>
+  <div id="fail" class="err hide"></div>
+  <div id="log"></div>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getDatabase,ref,get} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import {getFirestore,doc,collection,collectionGroup,getDocs,writeBatch} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const $=id=>document.getElementById(id);
+const log=m=>{$("log").textContent+=m+"\n";$("log").scrollTop=1e9};
+const ROOTS=["users","posts","shorts","subjects","units","mocks","calendar","app_update","invite"];
+let app,auth,rtdb,fs,user=null,plan=[];
+
+$("mode").onchange=()=>$("fileBox").classList.toggle("hide",$("mode").value!=="file");
+
+$("signin").onclick=async()=>{
+  try{
+    if(!app){
+      const pid=$("projectId").value.trim();
+      app=initializeApp({apiKey:$("apiKey").value.trim(),authDomain:pid+".firebaseapp.com",projectId:pid,databaseURL:$("dbUrl").value.trim()});
+      auth=getAuth(app);rtdb=getDatabase(app);fs=getFirestore(app);
+    }
+    user=(await signInWithPopup(auth,new GoogleAuthProvider())).user;
+    $("who").textContent="Signed in as "+user.email;
+  }catch(e){alert("Sign-in failed: "+e.message)}
+};
+
+// ---------- data cleaning ----------
+const clean=v=>{
+  if(v===null||v===undefined)return undefined;
+  if(Array.isArray(v))return v.map(clean).filter(x=>x!==undefined);
+  if(typeof v==="object"){const o={};for(const[k,x]of Object.entries(v)){if(!k)continue;const c=clean(x);if(c!==undefined)o[k]=c}return o}
+  return v;
+};
+const asObj=v=>{const c=clean(v);return c&&typeof c==="object"&&!Array.isArray(c)?c:{value:c??null}};
+const objectify=v=>Array.isArray(v)
+  ?Object.fromEntries(v.map((x,i)=>[String(i),objectify(x)]).filter(([,x])=>x!=null))
+  :(v&&typeof v==="object"?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,objectify(x)])):v);
+
+// ---------- RTDB tree → Firestore documents ----------
+function buildPlan(tree){
+  const docs=[];
+  const add=(path,data)=>{
+    const size=new Blob([JSON.stringify(data)]).size;
+    docs.push({path,data,tooBig:size>900000,size});
+  };
+  for(const[root,val]of Object.entries(tree)){
+    if(val==null)continue;
+    if(root==="app_update"){add("config/app_update",asObj(val));continue}
+    if(root==="units"||root==="invite"){
+      const sub=root==="units"?"unitItems":"inviteItems";
+      for(const[grp,items]of Object.entries(val)){
+        add(`${root}/${grp}`,{name:grp});
+        for(const[id,d]of Object.entries(items||{}))add(`${root}/${grp}/${sub}/${id}`,asObj(d));
+      }
+      continue;
+    }
+    if(typeof val!=="object"){add(`${root}/value`,{value:val});continue}
+    for(const[id,d]of Object.entries(val)){
+      if(d==null)continue;
+      add(`${root}/${id}`,asObj(root==="calendar"?objectify(d):d));
+    }
+  }
+  return docs;
+}
+
+// ---------- scan ----------
+$("scan").onclick=async()=>{
+  try{
+    let tree={};
+    if($("mode").value==="file"){
+      const f=$("file").files[0];if(!f)return alert("Choose the JSON export first");
+      tree=JSON.parse(await f.text());
+    }else{
+      if(!user)return alert("Sign in first");
+      for(const r of ROOTS){
+        try{const s=await get(ref(rtdb,r));if(s.exists())tree[r]=s.val();log(`read ${r}: ${s.exists()?"ok":"empty"}`)}
+        catch(e){log(`✗ ${r}: ${e.message}`)}
+      }
+    }
+    plan=buildPlan(tree);
+    const counts={};plan.forEach(p=>{const k=p.path.split("/")[0];counts[k]=(counts[k]||0)+1});
+    const big=plan.filter(p=>p.tooBig).length;
+    $("preview").innerHTML="<tr><th>Collection</th><th>Documents</th></tr>"+
+      Object.entries(counts).map(([k,n])=>`<tr><td>${k}</td><td>${n}</td></tr>`).join("")+
+      `<tr><th>Total</th><th>${plan.length}</th></tr>`+(big?`<tr><td colspan=2>⚠ ${big} document(s) over 900 KB will be skipped</td></tr>`:"");
+    $("preview").classList.remove("hide");
+    $("move").disabled=plan.length===0;
+    log(`Scan done: ${plan.length} documents ready`);
+  }catch(e){alert("Scan failed: "+e.message)}
+};
+
+// ---------- verify ----------
+async function verify(list){
+  const have=new Set();
+  for(const c of new Set(list.map(p=>p.path.split("/")[0])))
+    (await getDocs(collection(fs,c))).forEach(d=>have.add(d.ref.path));
+  for(const g of ["unitItems","inviteItems"])
+    if(list.some(p=>p.path.includes("/"+g+"/")))
+      (await getDocs(collectionGroup(fs,g))).forEach(d=>have.add(d.ref.path));
+  return list.filter(p=>!have.has(p.path)).map(p=>p.path);
+}
+
+// ---------- move ----------
+$("move").onclick=async()=>{
+  if(!user)return alert("Sign in first (needed to write to Firestore)");
+  $("move").disabled=true;$("ok").classList.add("hide");$("fail").classList.add("hide");
+  const good=plan.filter(p=>!p.tooBig),skipped=plan.length-good.length;
+  try{
+    let done=0;
+    for(let i=0;i<good.length;i+=400){
+      const b=writeBatch(fs),chunk=good.slice(i,i+400);
+      chunk.forEach(p=>b.set(doc(fs,p.path),p.data));
+      await b.commit();done+=chunk.length;
+      document.querySelector("#bar i").style.width=(done/good.length*100)+"%";
+      log(`Written ${done}/${good.length}`);
+    }
+    log("Verifying in Firestore…");
+    const missing=await verify(good);
+    if(missing.length||skipped){
+      $("fail").textContent=`Finished with problems: ${missing.length} missing, ${skipped} skipped (too large).`;
+      $("fail").classList.remove("hide");missing.slice(0,20).forEach(m=>log("missing: "+m));
+    }else{
+      $("ok").textContent=`✅ Successfully moved ${good.length} documents to Firestore`;
+      $("ok").classList.remove("hide");
+    }
+  }catch(e){
+    $("fail").textContent="Move failed: "+e.message;$("fail").classList.remove("hide");log(e.stack||e.message);
+  }
+  $("move").disabled=false;
+};
+</script>
+</body>
+</html>
