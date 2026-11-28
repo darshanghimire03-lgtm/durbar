@@ -36,6 +36,14 @@ function targetSections(privacy) {
   return parseSections(trimmed.substring("section".length));
 }
 
+function topicsFor(privacy, author) {
+  const normalized = String(privacy || "everyone").trim().toLowerCase();
+  if (!normalized.startsWith("section")) return ["posts_all"];
+  let sections = targetSections(privacy);
+  if (sections.length === 0) sections = parseSections(author.section);
+  return sections.map((s) => "section_" + s);
+}
+
 async function claim(key) {
   const result = await admin
     .database()
@@ -91,20 +99,116 @@ async function handlePost(uid, postId) {
     authorPhotoUrl: String(author.profileImageUrl || ""),
   };
 
-  const privacy = String(post.privacy || "everyone").trim().toLowerCase();
-  let topics;
-  if (!privacy.startsWith("section")) {
-    topics = ["posts_all"];
-  } else {
-    let sections = targetSections(post.privacy);
-    if (sections.length === 0) sections = parseSections(author.section);
-    topics = sections.map((s) => "section_" + s);
-  }
-
+  const topics = topicsFor(post.privacy, author);
   if (topics.length === 0) return { status: 200, body: { skipped: "no topics" } };
 
   await Promise.all(topics.map((topic) => send(topic, data)));
   return { status: 200, body: { sent: topics } };
+}
+
+async function handlePoll(uid, pollId) {
+  const fs = admin.firestore();
+  const snap = await fs.collection("poll").doc(pollId).get();
+  if (!snap.exists) return { status: 404, body: { error: "poll not found" } };
+  const poll = snap.data();
+
+  if (poll.authorUid !== uid) return { status: 403, body: { error: "forbidden" } };
+  if (Date.now() - Number(poll.createdAt || 0) > WINDOW_MS) {
+    return { status: 200, body: { skipped: "old" } };
+  }
+  if (!(await claim("polls/" + pollId))) {
+    return { status: 200, body: { skipped: "duplicate" } };
+  }
+
+  const authorSnap = await fs.collection("users").doc(uid).get();
+  const author = authorSnap.exists ? authorSnap.data() : {};
+
+  const data = {
+    type: "poll",
+    pollId: String(pollId),
+    authorUid: String(uid),
+    authorName: String(author.fullName || "Someone"),
+    authorPhotoUrl: String(author.profileImageUrl || ""),
+    topic: String(poll.topic || "").slice(0, 120),
+  };
+
+  const topics = topicsFor(poll.privacy, author);
+  if (topics.length === 0) return { status: 200, body: { skipped: "no topics" } };
+
+  await Promise.all(topics.map((topic) => send(topic, data)));
+  return { status: 200, body: { sent: topics } };
+}
+
+async function handleMessage(uid, chatId, messageId) {
+  const fs = admin.firestore();
+
+  const senderSnap = await fs.collection("users").doc(uid).get();
+  if (!senderSnap.exists) return { status: 404, body: { error: "user not found" } };
+  const sender = senderSnap.data();
+
+  const senderChats = Array.isArray(sender.chats) ? sender.chats : [];
+  if (!senderChats.includes(chatId)) return { status: 403, body: { error: "forbidden" } };
+
+  const msgSnap = await admin.database().ref("chats/" + chatId + "/" + messageId).get();
+  const msg = msgSnap.val();
+  if (!msg) return { status: 404, body: { error: "message not found" } };
+  if (msg.senderId !== uid) return { status: 403, body: { error: "forbidden" } };
+
+  if (Date.now() - Number(msg.sentAt || 0) > WINDOW_MS) {
+    return { status: 200, body: { skipped: "old" } };
+  }
+  if (!(await claim("messages/" + chatId + "_" + messageId))) {
+    return { status: 200, body: { skipped: "duplicate" } };
+  }
+
+  const members = await fs.collection("users").where("chats", "array-contains", chatId).get();
+  const recipients = members.docs.filter((d) => d.id !== uid);
+  if (recipients.length === 0) return { status: 200, body: { skipped: "no recipient" } };
+
+  let preview = String(msg.text || "").trim();
+  if (!preview && msg.imgUrl) preview = "Photo";
+  if (preview.length > 200) preview = preview.substring(0, 197) + "...";
+
+  const data = {
+    type: "message",
+    chatId: String(chatId),
+    messageId: String(messageId),
+    senderUid: String(uid),
+    senderName: String(sender.fullName || "Someone"),
+    senderPhotoUrl: String(sender.profileImageUrl || ""),
+    text: preview,
+    sentAt: String(msg.sentAt || Date.now()),
+  };
+
+  let sent = 0;
+  for (const doc of recipients) {
+    const stored = doc.get("fcmTokens");
+    const tokens = (Array.isArray(stored) ? stored : []).filter((t) => typeof t === "string" && t);
+    if (tokens.length === 0) continue;
+
+    const response = await admin.messaging().sendEachForMulticast({
+      tokens,
+      data: Object.assign({}, data, { toUid: doc.id }),
+      android: { priority: "high" },
+    });
+    sent += response.successCount;
+
+    const dead = [];
+    response.responses.forEach((r, i) => {
+      const code = r.error && r.error.code;
+      if (
+        code === "messaging/registration-token-not-registered" ||
+        code === "messaging/invalid-registration-token"
+      ) {
+        dead.push(tokens[i]);
+      }
+    });
+    if (dead.length > 0) {
+      await doc.ref.update({ fcmTokens: admin.firestore.FieldValue.arrayRemove(...dead) });
+    }
+  }
+
+  return { status: 200, body: { sent } };
 }
 
 async function handleNote(subjectKey, unitId, noteId) {
@@ -259,6 +363,14 @@ module.exports = async (req, res) => {
     let result;
     if (body.type === "post" && SAFE_KEY.test(String(body.postId || ""))) {
       result = await handlePost(decoded.uid, String(body.postId));
+    } else if (body.type === "poll" && SAFE_KEY.test(String(body.pollId || ""))) {
+      result = await handlePoll(decoded.uid, String(body.pollId));
+    } else if (
+      body.type === "message" &&
+      SAFE_KEY.test(String(body.chatId || "")) &&
+      SAFE_KEY.test(String(body.messageId || ""))
+    ) {
+      result = await handleMessage(decoded.uid, String(body.chatId), String(body.messageId));
     } else if (
       body.type === "note" &&
       SAFE_KEY.test(String(body.subjectKey || "")) &&
